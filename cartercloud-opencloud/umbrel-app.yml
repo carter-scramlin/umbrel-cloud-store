@@ -23,4 +23,4 @@ releaseNotes: Initial community packaging with persistent storage. Not yet teste
 dependencies: []
 path: ''
 defaultUsername: admin
-defaultPassword: $APP_PASSWORD
+deterministicPassword: true
