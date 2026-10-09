@@ -1,0 +1,26 @@
+manifestVersion: 1
+id: cartercloud-opencloud
+name: OpenCloud
+tagline: Your files on your own Umbrel
+icon: https://avatars.githubusercontent.com/opencloud-eu?s=256
+category: files
+version: 8.1.0
+port: 8385
+description: Self-hosted file storage and sharing with automatic initialization. Open
+  the app to reach https://umbrel.local:9443, accept the local self-signed certificate,
+  and sign in as admin with the app password displayed by Umbrel. Always use the configured
+  HTTPS hostname. Includes file management and sharing; online document editing requires
+  a separately configured office server.
+developer: OpenCloud
+website: https://opencloud.eu
+submitter: Carter Cloud Community
+submission: https://github.com/opencloud-eu/opencloud
+repo: https://github.com/opencloud-eu/opencloud
+support: https://github.com/opencloud-eu/opencloud/issues
+gallery: []
+releaseNotes: Initial community packaging with persistent storage. Not yet tested
+  on a live Umbrel.
+dependencies: []
+path: ''
+defaultUsername: admin
+defaultPassword: $APP_PASSWORD

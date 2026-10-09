@@ -1,0 +1,26 @@
+manifestVersion: 1
+id: cartercloud-pydio-cells
+name: Pydio Cells
+tagline: Your files on your own Umbrel
+icon: https://raw.githubusercontent.com/walkxcode/dashboard-icons/main/svg/pydio.svg
+category: files
+version: 4.4.18
+port: 8384
+description: Self-hosted file storage, sharing, and collaboration. Includes a private
+  MariaDB database. On first launch, use database host database, port 3306, database
+  cells, user pydio, and the app password displayed by Umbrel. Create your own Cells
+  administrator in the setup wizard. LAN HTTP by default; configure HTTPS before remote
+  access. Desktop Cells Sync is not configured in this initial package.
+developer: Pydio
+website: https://pydio.com
+submitter: Carter Cloud Community
+submission: https://github.com/pydio/cells
+repo: https://github.com/pydio/cells
+support: https://github.com/pydio/cells/issues
+gallery: []
+releaseNotes: Initial community packaging with persistent storage. Not yet tested
+  on a live Umbrel.
+dependencies: []
+path: ''
+defaultUsername: ''
+defaultPassword: $APP_PASSWORD

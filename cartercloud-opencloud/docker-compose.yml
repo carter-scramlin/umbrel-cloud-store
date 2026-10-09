@@ -1,0 +1,45 @@
+version: "3.7"
+services:
+  app_proxy:
+    environment:
+      APP_HOST: cartercloud-opencloud_launcher_1
+      APP_PORT: 80
+      APP_AUTH_ENABLED: "false"
+  launcher:
+    image: nginx:1.28.0-alpine@sha256:30f1c0d78e0ad60901648be663a710bdadf19e4c10ac6782c235200619158284
+    restart: on-failure
+    environment:
+      OPENCLOUD_PUBLIC_URL: "https://${DEVICE_DOMAIN_NAME:-umbrel.local}:9443"
+    volumes:
+      - ${APP_DATA_DIR}/nginx/default.conf.template:/etc/nginx/templates/default.conf.template:ro
+  permissions:
+    image: busybox:1.37.0@sha256:bdf57e528e45e4433820e045b29b4597825a1c9e38353532d90a01445013f82e
+    user: "0:0"
+    restart: "no"
+    command: ["sh", "-ec", "mkdir -p /config /data; chown 1000:1000 /config /data; chmod 700 /config /data"]
+    volumes:
+      - ${APP_DATA_DIR}/data/config:/config
+      - ${APP_DATA_DIR}/data/storage:/data
+  server:
+    image: opencloudeu/opencloud-rolling:8.1.0@sha256:8fc64ca861739cc62095cd558814f2eba6a90acf5998d884e439b33a47875da8
+    user: "1000:1000"
+    restart: on-failure
+    init: true
+    entrypoint: ["/bin/sh"]
+    command: ["-ec", "if [ ! -s /etc/opencloud/opencloud.yaml ]; then opencloud init; fi; exec opencloud server"]
+    environment:
+      OC_URL: "https://${DEVICE_DOMAIN_NAME:-umbrel.local}:9443"
+      OC_INSECURE: "true"
+      PROXY_TLS: "true"
+      PROXY_HTTP_ADDR: "0.0.0.0:9200"
+      IDM_ADMIN_PASSWORD: "${APP_PASSWORD}"
+      IDM_CREATE_DEMO_USERS: "false"
+      OC_LOG_LEVEL: info
+    ports:
+      - "9443:9200"
+    volumes:
+      - ${APP_DATA_DIR}/data/config:/etc/opencloud
+      - ${APP_DATA_DIR}/data/storage:/var/lib/opencloud
+    depends_on:
+      permissions:
+        condition: service_completed_successfully
