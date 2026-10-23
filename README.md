@@ -1,13 +1,13 @@
 # Carter Cloud — Umbrel Community App Store
 
-A community app store containing **Pydio Cells** and **OpenCloud** for umbrelOS.
+A community app store containing **Pydio Cells**, **OpenCloud**, and **Filestash** for umbrelOS.
 No Portainer or separate database installation is required.
 
 ## Install in Umbrel
 
 1. Open **App Store → menu → Community App Stores** (wording may vary).
 2. Add `https://github.com/carter-scramlin/umbrel-cloud-store`.
-3. Open **Carter Cloud** and install either app.
+3. Open **Carter Cloud** and install an app.
 
 This repository contains the app store definitions at its root. No separate
 Portainer installation is required.
@@ -66,16 +66,88 @@ The permissions helper owns only those two directory roots as UID/GID 1000.
 Office editing, Collabora, SMTP, and external storage integrations are not
 bundled. Both apps can be installed together.
 
+## Filestash
+
+Install **Filestash** from Carter Cloud and open it from Umbrel
+(`http://umbrel.local:8386`, or the HTTPS address offered by Umbrel).
+Requires umbrelOS 2.0 or newer. Collabora Online is included in the package;
+there is no separate Office app, database, or Portainer dependency.
+
+1. Create your Filestash administrator password in the browser.
+2. In the admin console, enable **Local** storage. Set its path to `/files/`
+   to restrict the connection to the files folder. Use your administrator
+   password when connecting, or configure Filestash's own user authentication.
+3. Click the Filestash logo to return to the login page and connect.
+4. To manage existing files, use **Umbrel → Filestash → App Settings → Files**
+   to select a Home folder, external drive, or network share. The selected
+   folder replaces the default `/files` mount; existing files are not copied.
+5. Enable other storage backends and enter their connection credentials in
+   Filestash. OAuth providers also require the provider's application setup.
+
+The default `/files` folder is stored in `data/files`. Configuration, database,
+credentials, share links, and installed plugins persist in `data/state`.
+Umbrel's **Move app data** setting can relocate these app-owned directories.
+A separately selected Files folder stays in its original location and needs
+its own backup. Selected folders must allow UID/GID `1000:1000` the intended
+read/write access; this package does not recursively change their ownership.
+
+The official image includes its standard storage backends, text/image/PDF
+viewers, search, file transfer/management, sharing, and Office integration.
+Collabora edits supported documents, spreadsheets, and presentations through
+the same origin as Filestash, including WebSockets and authenticated WOPI
+callbacks. Office HTTP port 9980 is internal and is not published to the LAN.
+Large transfers are streamed without a gateway upload-size limit; any outer
+proxy or storage provider may apply its own limits. CODE is the community
+Office edition intended for home use and small teams.
+
+Umbrel login protection stays enabled by default. Sharing works for users
+who can log in to Umbrel. To allow recipients or WebDAV clients without an
+Umbrel login, first configure Filestash authentication and share restrictions,
+then turn off **Require Umbrel login** in that app's Umbrel settings. This
+removes Umbrel protection for the whole app; Filestash supplies authentication.
+Public access needs your own reachable URL and trusted HTTPS. Set Filestash's
+public host in its admin settings if you need a fixed canonical URL; leave it
+unset for access using multiple LAN hostnames/IPs. External connectors require
+your accounts and provider permissions. Optional paid plugins are not licensed
+by this community package.
+
+Filestash reports version `v0.6.20261022` in the pinned image. Its current
+upstream release channel publishes `latest` without matching stable version
+tags, so this package pins its immutable multi-platform digest. Office uses
+the version from Filestash's official Compose example, also pinned by digest.
+Collabora's `MKNOD` capability is used for its document-process sandbox, as in
+upstream container deployments. No privileged mode or Docker socket is used.
+All runtime gateway configuration is in Compose so Umbrel updates carry it.
+
+### Filestash verification
+
+On 2026-10-22, the official Umbrel linter passed with image checks and zero
+errors. Both Linux amd64 and arm64 image manifests were verified. Intentional
+warnings: the pinned Filestash `latest` tag and Collabora's `MKNOD` capability.
+Runtime testing used an isolated Docker amd64 stack with Umbrel-style container
+names and the packaged gateway. It verified first-run admin creation/login,
+local storage login, folder creation, upload/download, rename/list, deletion, search, share-link
+creation and anonymous download, Office discovery, and browser Office editing
+with saved changes confirmed in persistent storage. HTTP/HTTPS forwarding
+emits the matching ws/wss URL. Credentials, files, shares, and saved Office edits
+survived recreation of all containers. See `cartercloud-filestash/TESTING.md` for details.
+
+The package has not yet been installed through a live Umbrel lifecycle.
+Umbrel login/HTTPS termination, folder selection, and moving app data still
+need verification on the target device. ARM runtime, remote services requiring
+user credentials, and optional commercial plugins were not exercised.
+
 ## Ports
 
 | App | Umbrel launcher | Other host port |
 |---|---:|---:|
 | Pydio Cells | 8384 | None |
 | OpenCloud | 8385 | 9443 (HTTPS) |
+| Filestash | 8386 | None |
 
 Check these are unused on your server before installing.
 
-## Verification and limitations
+## Pydio Cells and OpenCloud verification and limitations
 
 Docker images are pinned by multi-platform manifest digest and their registry
 manifests were checked for Linux amd64 and arm64 support. YAML and app IDs were
@@ -104,6 +176,9 @@ all configuration/secrets. Umbrel uninstall may delete app data.
 - https://docs.pydio.com/latest/admin-guide/quick-start/cells-installation/docker/
 - https://docs.opencloud.eu/docs/admin/getting-started/container/docker/
 - https://github.com/opencloud-eu/opencloud-compose
+- https://www.filestash.app/docs/install-and-upgrade/
+- https://downloads.filestash.app/latest/docker-compose.yml
+- https://github.com/mickael-kerjean/filestash
 
-Unofficial community packaging; no affiliation with Umbrel, Pydio, or OpenCloud.
+Unofficial community packaging; no affiliation with Umbrel, Pydio, OpenCloud, Filestash, or Collabora.
 Application software retains its upstream licenses. Packaging is MIT licensed.

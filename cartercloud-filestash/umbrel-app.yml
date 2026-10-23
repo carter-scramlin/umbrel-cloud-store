@@ -1,0 +1,51 @@
+manifestVersion: 2.0
+id: cartercloud-filestash
+storage:
+  dataRoot: data
+folderAccess:
+  - id: files
+    name: Files
+    note: Select a folder to manage in Filestash. It appears at /files in the Local storage connection. Filestash can modify and delete files in this folder.
+    mounts:
+      - service: server
+        targetPath: /files
+        readOnly: false
+category: files
+name: Filestash
+version: "0.6.20261022"
+tagline: Manage local and remote files with online Office editing
+description: >-
+  Open Filestash and create your administrator password. In the admin console,
+  enable Local storage and connect to /files using your admin password, or configure
+  a remote storage connection. Choose a folder in Umbrel App Settings to manage
+  existing files, an external drive, or a network share.
+
+
+  Browse, upload, download, rename, move, edit, search, preview, and share files.
+  Connect to the storage backends included in the official Filestash image,
+  including SFTP, FTP, S3, WebDAV, SMB, and other supported services.
+
+
+  Collabora Online is included for editing compatible text documents,
+  spreadsheets, and presentations from your browser. Both services use the
+  same Umbrel address; no separate Office port or server is needed.
+
+
+  Umbrel login protection is enabled by default. For recipients without an
+  Umbrel account, configure Filestash authentication and sharing controls before
+  disabling Require Umbrel login in App Settings. External storage services
+  need your own credentials; optional commercial plugins require their own licenses.
+releaseNotes: ""
+developer: Mickael Kerjean
+website: https://www.filestash.app
+dependencies: []
+repo: https://github.com/mickael-kerjean/filestash
+support: https://github.com/carter-scramlin/umbrel-cloud-store/issues
+port: 8386
+gallery: []
+path: ""
+defaultUsername: ""
+defaultPassword: ""
+icon: https://raw.githubusercontent.com/mickael-kerjean/filestash/6463fe9fdb5e3eb40bc4b8a77ec14189643a2909/.assets/img/logo_primary.svg
+submitter: Carter Scramlin
+submission: https://github.com/carter-scramlin/umbrel-cloud-store

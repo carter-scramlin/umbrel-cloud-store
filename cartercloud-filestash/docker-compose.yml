@@ -1,0 +1,84 @@
+# Filestash currently publishes no matching stable image tag; its latest image is pinned immutably.
+# The gateway configuration stays in Compose so Umbrel updates carry it.
+services:
+  app_proxy:
+    environment:
+      APP_HOST: cartercloud-filestash_gateway_1
+      APP_PORT: 8080
+  gateway:
+    image: nginx:1.28.3-alpine@sha256:a8b39bd9cf0f83869a2162827a0caf6137ddf759d50a171451b335cecc87d236
+    restart: on-failure
+    depends_on:
+    - server
+    - office
+    environment:
+      GATEWAY_CONFIG: |
+        map $$http_upgrade $$connection_upgrade {
+            default upgrade;
+            '' close;
+        }
+        map $$http_x_forwarded_proto $$forwarded_proto {
+            default $$http_x_forwarded_proto;
+            '' $$scheme;
+        }
+        map $$forwarded_proto $$office_ws_scheme {
+            default ws;
+            https wss;
+        }
+        server {
+            listen 8080;
+            server_name _;
+            client_max_body_size 0;
+            proxy_http_version 1.1;
+            proxy_read_timeout 3600s;
+            proxy_send_timeout 3600s;
+            proxy_request_buffering off;
+            proxy_buffering off;
+            proxy_set_header Accept-Encoding "";
+            proxy_set_header Host $$http_host;
+            proxy_set_header X-Real-IP $$remote_addr;
+            proxy_set_header X-Forwarded-For $$proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $$forwarded_proto;
+            proxy_set_header Upgrade $$http_upgrade;
+            proxy_set_header Connection $$connection_upgrade;
+
+            # Do not expose Collabora's server administration console.
+            location ^~ /browser/dist/admin/ { return 404; }
+            location ^~ /cool/adminws { return 404; }
+            location ~ ^/browser/[^/]+/admin/ { return 404; }
+            location ~ ^/(browser|cool|hosting|lool)(/|$$) {
+                # Collabora assumes TLS termination; match the actual browser scheme.
+                sub_filter 'wss://' '$$office_ws_scheme://';
+                sub_filter_once off;
+                proxy_pass http://cartercloud-filestash_office_1:9980;
+            }
+            location / {
+                proxy_pass http://cartercloud-filestash_server_1:8334;
+            }
+        }
+    entrypoint:
+    - /bin/sh
+    - -ec
+    command:
+    - |-
+      printf '%s\n' "$$GATEWAY_CONFIG" > /etc/nginx/conf.d/default.conf
+      exec /docker-entrypoint.sh nginx -g 'daemon off;'
+  server:
+    image: machines/filestash:latest@sha256:12bd8c30da4d09a37969bc6f800be9dfc34c51ed330301394af28c5c5be065e8
+    user: 1000:1000
+    restart: on-failure
+    environment:
+      OFFICE_URL: http://cartercloud-filestash_office_1:9980
+      OFFICE_FILESTASH_URL: http://cartercloud-filestash_server_1:8334
+      OFFICE_REWRITE_URL: /
+    volumes:
+    - ${APP_DATA_DIR}/data/state:/app/data/state
+    - ${APP_DATA_DIR}/data/files:/files
+  office:
+    image: collabora/code:24.04.10.2.1@sha256:3ee501932bda6c85f4ef116d696cf4cce92387491c764ceb9684da57913b605a
+    restart: on-failure
+    environment:
+      aliasgroup1: http://cartercloud-filestash_server_1:8334
+      extra_params: --o:ssl.enable=false --o:ssl.termination=true --o:welcome.enable=false --o:net.proto=IPv4
+    cap_add:
+    - MKNOD
