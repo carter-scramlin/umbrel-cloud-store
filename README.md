@@ -1,6 +1,6 @@
 # Carter Cloud — Umbrel Community App Store
 
-A community app store containing **Pydio Cells**, **OpenCloud**, and **Filestash** for umbrelOS.
+A community app store containing **Pydio Cells**, **OpenCloud**, **Filestash**, and **T3 Code** for umbrelOS.
 No Portainer or separate database installation is required.
 
 ## Install in Umbrel
@@ -137,6 +137,64 @@ Umbrel login/HTTPS termination, folder selection, and moving app data still
 need verification on the target device. ARM runtime, remote services requiring
 user credentials, and optional commercial plugins were not exercised.
 
+## T3 Code
+
+Install **T3 Code** from Carter Cloud and open it from Umbrel. Requires umbrelOS
+2.0 or newer. The launcher uses **HTTPS on port 8387**, because browser pairing
+uses secure-context browser APIs. Use Umbrel's trusted HTTPS address.
+
+The launcher creates a short-lived, one-use pairing link for the browser after
+Umbrel login. There is no separate default T3 username or password. Keep
+**Require Umbrel login** enabled: the launcher grants full T3 access to anyone
+who can reach it. Coding agents can execute commands in their container and
+modify the selected projects folder. No host Docker socket, host networking,
+privileged mode, or host-wide filesystem access is granted.
+
+1. Finish the T3 onboarding screens. Connect a provider in **Settings →
+   Providers**; Codex offers **Continue with ChatGPT**, and other providers
+   have their own install/login flow. Provider accounts, subscriptions, and
+   API charges are separate. No account credentials are bundled.
+2. Add a project under `/projects`, or create a repository there from the UI.
+3. To use an existing folder, choose **Umbrel → T3 Code → App Settings →
+   Projects**. The selected folder replaces `/projects`; files are not copied.
+   It must permit UID/GID `1000:1000` to read and write. Back it up separately.
+
+The official T3 Code `0.1.5` Linux release is downloaded on first startup and
+checked against a fixed SHA-256 for amd64 or arm64. The Node `24.22.2` Debian
+image is pinned by its multi-platform digest and includes Git, SSH, npm, and
+build tools. First startup needs access to GitHub and may take several minutes;
+later starts reuse the cached release. Provider installation and login may
+also need outbound network access. Upgrades should be made in this store,
+rather than through `t3 update` inside the container.
+
+The entire container home persists in `data/home`, including T3's database,
+secrets, provider runtimes, npm installs, and credentials. Default projects
+persist in `data/projects`. The `t3` command is on the app terminal's PATH.
+Projects created elsewhere in the container filesystem do not persist. Back
+up both directories before upgrades; uninstalling the app can delete its data.
+The launcher template is rendered by Umbrel and is included in its update
+mechanism. It preserves native T3 authentication and HTTP/WebSocket traffic.
+
+Optional T3 browser automation/HTML rendering is not preconfigured: the
+minimal server environment may need browser libraries and a working Chrome
+sandbox. Ordinary coding tasks, terminals, Git, and the T3 browser UI do not
+require that feature. Mobile pairing/T3 Connect, external provider login,
+agent execution with a paid account, and ARM runtime were not exercised.
+
+### T3 Code verification
+
+On 2026-10-29, the official Umbrel package linter passed with public image
+checks and **zero errors or warnings**. The pinned image has Linux amd64 and
+arm64 manifests. An isolated amd64 Docker test exercised the actual first-run
+release download/checksum, automatic browser pairing, onboarding, provider
+setup screen, and adding a Git project. Recreating the container retained
+the project, database, and authenticated browser session, without another
+release download. A provider account is still needed to run an agent.
+
+This is Docker and browser verification, not a completed live Umbrel lifecycle
+test. Umbrel HTTPS termination, community-store refresh, folder selection,
+and moving app data still need verification on the target device.
+
 ## Ports
 
 | App | Umbrel launcher | Other host port |
@@ -144,6 +202,7 @@ user credentials, and optional commercial plugins were not exercised.
 | Pydio Cells | 8384 | None |
 | OpenCloud | 8385 | 9443 (HTTPS) |
 | Filestash | 8386 | None |
+| T3 Code | 8387 (HTTPS) | None |
 
 Check these are unused on your server before installing.
 
@@ -179,6 +238,8 @@ all configuration/secrets. Umbrel uninstall may delete app data.
 - https://www.filestash.app/docs/install-and-upgrade/
 - https://downloads.filestash.app/latest/docker-compose.yml
 - https://github.com/mickael-kerjean/filestash
+- https://github.com/pingdotgg/t3code
+- https://github.com/pingdotgg/t3code/blob/v0.1.5/docs/user/install.md
 
-Unofficial community packaging; no affiliation with Umbrel, Pydio, OpenCloud, Filestash, or Collabora.
+Unofficial community packaging; no affiliation with Umbrel, Pydio, OpenCloud, Filestash, Collabora, or T3 Tools.
 Application software retains its upstream licenses. Packaging is MIT licensed.
