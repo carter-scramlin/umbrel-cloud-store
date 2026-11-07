@@ -1,6 +1,6 @@
 # Carter Cloud — Umbrel Community App Store
 
-A community app store containing **Pydio Cells**, **OpenCloud**, **Filestash**, and **T3 Code** for umbrelOS.
+A community app store containing **Pydio Cells**, **OpenCloud**, **Filestash**, **T3 Code**, and **Umbrel Drive** for umbrelOS.
 No Portainer or separate database installation is required.
 
 ## Install in Umbrel
@@ -195,6 +195,13 @@ This is Docker and browser verification, not a completed live Umbrel lifecycle
 test. Umbrel HTTPS termination, community-store refresh, folder selection,
 and moving app data still need verification on the target device.
 
+## Umbrel Drive
+
+A community preview with a web file browser, expiring share links, version
+history, Trash, a Linux sync and backup agent, and an installable Android web
+client. Requires umbrelOS 2.0 and trusted HTTPS. See the
+[Umbrel Drive setup guide](cartercloud-umbrel-drive/README.md).
+
 ## Ports
 
 | App | Umbrel launcher | Other host port |
@@ -203,6 +210,7 @@ and moving app data still need verification on the target device.
 | OpenCloud | 8385 | 9443 (HTTPS) |
 | Filestash | 8386 | None |
 | T3 Code | 8387 (HTTPS) | None |
+| Umbrel Drive | 8388 (HTTPS) | None |
 
 Check these are unused on your server before installing.
 

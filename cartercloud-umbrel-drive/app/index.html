@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#151322">
+  <title>Umbrel Drive</title>
+  <link rel="icon" href="/icon.svg" type="image/svg+xml">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="stylesheet" href="/style.css">
+  <script defer src="/drive.js"></script>
+</head>
+<body>
+  <header>
+    <a href="/" class="brand"><img src="/icon.svg" alt="">Umbrel Drive</a>
+    <span class="badge">Community preview</span>
+    <div class="spacer"></div>
+    <button id="install" hidden>Install app</button>
+    <button id="signout" hidden>Sign out</button>
+  </header>
+  <main>
+    <section id="welcome" class="welcome" hidden>
+      <img src="/icon.svg" alt="">
+      <p class="eyebrow">YOUR PERSONAL CLOUD</p>
+      <h1>Welcome to Umbrel Drive</h1>
+      <p>Access the files on your Umbrel from any of your devices.</p>
+      <form id="login">
+        <label for="password">App password</label>
+        <input id="password" type="password" autocomplete="current-password" required>
+        <button class="primary">Sign in</button>
+      </form>
+      <p class="hint">Find the app password on the Umbrel Drive page in your app store.</p>
+    </section>
+    <div id="workspace" class="workspace" hidden>
+      <nav aria-label="Drive navigation">
+        <span class="eyebrow">WORKSPACE</span>
+        <button data-view="files"><span aria-hidden="true">▤</span> My Drive</button>
+        <button data-view="offline"><span aria-hidden="true">↓</span> Offline</button>
+        <button data-view="shares"><span aria-hidden="true">↗</span> Shared links</button>
+        <button data-view="trash"><span aria-hidden="true">▧</span> Trash</button>
+        <button data-view="devices"><span aria-hidden="true">▣</span> Devices</button>
+      </nav>
+      <section class="content">
+        <div class="section-head">
+          <div><p class="eyebrow">UMBREL DRIVE</p><h1 id="title">My Drive</h1></div>
+          <div id="toolbar" class="actions">
+            <button id="folder">New folder</button>
+            <button id="upload" class="primary">Upload files</button>
+            <input id="picker" type="file" multiple hidden>
+          </div>
+        </div>
+        <p id="description" class="hint"></p>
+        <div id="browser-tools">
+          <input id="search" type="search" placeholder="Search your drive" aria-label="Search your drive">
+          <div id="breadcrumbs" aria-label="Folder path"></div>
+        </div>
+        <div id="items" class="panel"></div>
+      </section>
+    </div>
+    <p id="status" role="status" aria-live="polite"></p>
+  </main>
+  <dialog id="dialog">
+    <form method="dialog" class="dialog-head"><h2 id="dialog-title"></h2><button aria-label="Close dialog">Close</button></form>
+    <div id="dialog-body"></div>
+  </dialog>
+</body>
+</html>
