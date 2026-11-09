@@ -32,6 +32,7 @@ jobs:
         run: |
           python3 cartercloud-drive/tests/shared_network.py --compose "$RUNNER_TEMP/drive-test/compose.yml" --env-file "$RUNNER_TEMP/drive-test/test.env" --project umbrel-drive-ci
           python3 cartercloud-drive/tests/integration.py
+          python3 cartercloud-drive/tests/assets.py
           python3 cartercloud-drive/tests/files_bridge.py
           python3 cartercloud-drive/tests/files_mount_lifecycle.py --compose "$RUNNER_TEMP/drive-test/compose.yml" --env-file "$RUNNER_TEMP/drive-test/test.env" --project umbrel-drive-ci --fixtures "$RUNNER_TEMP/drive-test/choices"
           python3 cartercloud-drive/tests/test_backup.py
@@ -61,17 +62,18 @@ jobs:
           cp cartercloud-drive/clients/umbrel-drive-backup.* release-output/
           cp cartercloud-drive/FEATURES.md release-output/FEATURES.md
           cp cartercloud-drive/TESTING.md release-output/TESTING.md
-          git archive --format=zip --output=release-output/Umbrel-Drive-1.1.1-server-source.zip HEAD cartercloud-drive .github/workflows/umbrel-drive-release.yml umbrel-app-store.yml
+          cp docs/umbrel-drive-roadmap.md release-output/ROADMAP.md
+          git archive --format=zip --output=release-output/Umbrel-Drive-1.1.2-server-source.zip HEAD cartercloud-drive docs/umbrel-drive-roadmap.md .github/workflows/umbrel-drive-release.yml umbrel-app-store.yml
           cd release-output
           sha256sum * > SHA256SUMS
-      - name: Publish Files integration preview
+      - name: Publish browser performance preview
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          if gh release view umbrel-drive-v1.1.1 >/dev/null 2>&1; then
-            echo 'The immutable 1.1.1 release already exists; leaving it intact.'
+          if gh release view umbrel-drive-v1.1.2 >/dev/null 2>&1; then
+            echo 'The immutable 1.1.2 release already exists; leaving it intact.'
           else
-            gh release create umbrel-drive-v1.1.1 release-output/* --target "$GITHUB_SHA" --title 'Umbrel Drive 1.1.1 — browser sign-in fix' --prerelease --notes-file cartercloud-drive/RELEASE.md
+            gh release create umbrel-drive-v1.1.2 release-output/* --target "$GITHUB_SHA" --title 'Umbrel Drive 1.1.2 — smaller browser downloads' --prerelease --notes-file cartercloud-drive/RELEASE.md
           fi
       - name: Stop isolated test server
         if: always()

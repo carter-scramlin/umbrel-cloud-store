@@ -99,3 +99,18 @@ before startup, and makes health checks load the login page. New tests perform
 repeated login-page requests, real cookie/CSRF sign-in, authenticated Files access,
 and Devices & Files rendering under deliberate db/redis DNS collisions, including
 a container restart. Existing 1.1.0 test data and credentials were preserved.
+
+## Browser transfer optimization, server 1.1.2
+
+The isolated existing-data stack was upgraded through the runtime bundle/pre-start
+path. Cookie/CSRF sign-in, Files access, and Android connection guidance render
+correctly. Static asset tests compare decoded identity, gzip, and Brotli responses
+byte for byte, check encoding negotiation/Vary and immutable cache headers, and
+verify that dynamic status.php stays on the upstream path. The largest script is
+13.2% smaller in transfer than its existing gzip response. Full web interaction
+latency and physical-phone compatibility are not established by these checks.
+The release workflow repeats shared-network, file workflows, Files bridge lifecycle,
+backup, source packaging, and asset-integrity regressions before publication.
+
+See [the measured baseline and roadmap](../docs/umbrel-drive-roadmap.md) for
+performance boundaries and features that remain planned.

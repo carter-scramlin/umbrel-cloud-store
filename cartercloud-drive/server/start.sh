@@ -2,6 +2,10 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 set -eu
 . /opt/umbreldrive/user.sh
+# The pinned Apache image already includes mod_brotli. Negotiate smaller static
+# bundles with modern browsers while retaining gzip and identity fallbacks.
+a2enmod brotli >/dev/null
+cp /opt/umbreldrive/assets.conf /etc/apache2/conf-enabled/umbrel-drive-assets.conf
 # Migrate only this app's private Nextcloud tree. Never chown the selected Files folder.
 if [ ! -f /var/www/html/.umbrel-uid-1000 ]; then
   find /var/www/html -xdev -uid 33 -exec chown -h 1000:1000 {} +

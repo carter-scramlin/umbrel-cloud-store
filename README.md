@@ -265,3 +265,5 @@ all configuration/secrets. Umbrel uninstall may delete app data.
 
 Unofficial community packaging; no affiliation with Umbrel, Pydio, OpenCloud, Filestash, Collabora, or T3 Tools.
 Application software retains its upstream licenses. Packaging is MIT licensed.
+
+Umbrel Drive: [Android integration, performance findings, and feature roadmap](docs/umbrel-drive-roadmap.md).

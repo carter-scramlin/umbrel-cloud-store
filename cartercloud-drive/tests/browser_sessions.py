@@ -34,6 +34,8 @@ def check_browser(opener=None):
         page = response.read().decode()
         assert 'One folder. Every device.' in page
         assert 'Your server address' in page
+        assert 'The Umbrel app for Android' in page
+        assert 'Apps → Umbrel Drive' in page
     # This request must retain the browser's authenticated session.
     with opener.open(BASE + '/remote.php/dav/files/umbrel/Readme.md', timeout=30) as response:
         assert response.status == 200

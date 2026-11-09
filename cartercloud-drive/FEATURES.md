@@ -7,6 +7,7 @@ that every device and operating-system combination has been tested here.
 | Synology Drive capability | Umbrel Drive implementation | Status |
 |---|---|---|
 | Web file browser, folders, sorting, grid/list | Nextcloud Files with Umbrel Drive theme | Included |
+| Official Umbrel Android app | Open from Apps using its existing WebView; native Files reaches the selected folder | Documented/source-supported path; physical-phone QA pending; separate Drive login |
 | Native Umbrel Files integration | Folder picker, same files, UID 1000, owner-only local storage mount, automatic indexing | Round-trip and isolation integration tested |
 | Name search, favorites, tags, recent files | Files and unified search | Included |
 | File previews, photos, PDF viewing | Viewer, Photos, PDF viewer | Included; codec/format limits apply |
@@ -44,3 +45,5 @@ References: [Synology Drive specifications](https://www.synology.com/en-us/dsm/7
 [Nextcloud WebDAV APIs](https://docs.nextcloud.com/server/stable/developer_manual/client_apis/WebDAV/index.html),
 [Nextcloud desktop source](https://github.com/nextcloud/desktop),
 [Nextcloud Android source](https://github.com/nextcloud/android).
+
+[Android integration, performance and feature roadmap](../docs/umbrel-drive-roadmap.md) identifies priorities, acceptance gates, and additional Google Drive comparisons.

@@ -20,6 +20,7 @@ class PageController extends Controller {
   $os = ($origin['scheme'] ?? 'https') . '://' . $origin['host'];
   return new TemplateResponse('umbreldrive', 'index', [
    'server' => $this->urls->getAbsoluteURL('/'),
+   'umbrelHost' => $origin['host'],
    'files' => $this->urls->linkToRoute('files.view.index'),
    'security' => $this->urls->linkToRoute('settings.PersonalSettings.index', ['section' => 'security']),
    'logo' => $this->urls->imagePath('umbreldrive', 'logo.svg'),

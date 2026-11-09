@@ -79,6 +79,28 @@ Advanced settings → HTTPS certificate** on the devices you connect. Keep certi
 validation enabled. With a separate app-only reverse-proxy hostname, open native
 Umbrel settings/Files through your usual Umbrel address instead of the shortcuts.
 
+## Official Umbrel Android app
+
+Connect the official app to your Umbrel's hostname/IP **without the Drive port**,
+then open **Apps → Umbrel Drive**. Sign in with your separate Drive account.
+**Home → Files → View all** reaches the selected folder through native Umbrel Files.
+The official app's photo backup targets Umbrel Photos; it is separate from the
+Drive client's offline files and auto-upload. This connection path is supported
+by Umbrel's documentation/source, but has not yet been tested on a physical phone
+with this community package. It does not provide Drive SSO or general folder sync.
+
+See the [Android integration and feature roadmap](../docs/umbrel-drive-roadmap.md)
+for the implementation sequence, acceptance tests, performance limits, and gaps.
+
+## Browser performance
+
+Static browser scripts/styles negotiate Brotli on supported HTTPS browsers and
+retain gzip and identity fallbacks. Their existing versioned cache headers remain
+in place. PHP pages, DAV, file downloads, and authentication use upstream behavior.
+This reduces transfer size; it does not remove Nextcloud's JavaScript parsing cost.
+A new preview is benchmarked against the installed version before claiming changes
+in latency. See the roadmap for the current measurements and remaining work.
+
 ## Linux
 
 Download `Umbrel-Drive-1.0.0-linux-x86_64.AppImage` from the
