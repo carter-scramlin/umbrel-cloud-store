@@ -29,7 +29,9 @@ if __name__ == '__main__':
     target = ROOT / 'drive-runtime.b64.template'
     result = bundle()
     if '--check' in sys.argv:
-        if target.read_bytes() != result:
+        # Python/zlib releases can emit different gzip headers or deflate bytes.
+        # Compare the canonical tar payload rather than the compressor's envelope.
+        if gzip.decompress(base64.decodebytes(target.read_bytes())) != gzip.decompress(base64.decodebytes(result)):
             raise SystemExit('Runtime bundle is stale: run tools/package_runtime.py')
         print('Runtime bundle matches server sources.')
     else:
