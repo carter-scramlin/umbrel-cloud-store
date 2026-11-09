@@ -17,6 +17,9 @@
 - Four backup-helper tests passed: snapshot contents/hashes and empty folders,
   symlink/exclusion behavior, interrupted-upload completion safety, HTTPS
   validation, and redirect refusal (some assertions are grouped in one test).
+- A fresh-source release packaging test passes: all three file-manager modules
+  are generated from the canonical upstream source, preserve SPDX notices, and
+  omit build caches from corresponding-source archives.
 - Python files compile, shell scripts parse, YAML parses, and Git whitespace
   checks pass. An automated GitHub release workflow repeats server/API checks
   and verifies native binary SHA-256 hashes before publishing downloads.

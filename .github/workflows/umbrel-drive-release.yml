@@ -30,6 +30,7 @@ jobs:
         run: |
           python3 cartercloud-drive/tests/integration.py
           python3 cartercloud-drive/tests/test_backup.py
+          python3 cartercloud-drive/tests/test_packaging.py
       - name: Fetch immutable native binaries
         run: |
           asset_commit=$(python3 -c 'import json; print(json.load(open("cartercloud-drive/clients/release-assets.json"))["commit"])')
