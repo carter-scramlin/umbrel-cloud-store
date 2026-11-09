@@ -25,6 +25,10 @@ the archive download fails, startup fails instead of silently omitting team fold
 Subsequent startups use the installed app. The server images support amd64 and
 arm64; the provided Linux desktop binary is x86_64.
 
+Drive uses app-specific database/cache network aliases so it can coexist with
+other apps on Umbrel’s shared Docker network. Health checks include browser login
+page rendering.
+
 The app uses its own Nextcloud login so native clients and public links can work
 without an Umbrel browser session. Use trusted HTTPS. The server trusts only the
 Umbrel proxy network; it derives its public address from the incoming request.

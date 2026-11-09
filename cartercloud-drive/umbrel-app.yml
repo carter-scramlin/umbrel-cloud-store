@@ -2,7 +2,7 @@ manifestVersion: 2.0
 id: cartercloud-drive
 name: Umbrel Drive
 category: files
-version: 1.1.0
+version: 1.1.1
 tagline: Your files. Right at home.
 description: "A community drive for your Umbrel, with a clean file browser and native\
   \ Linux and Android clients built on Nextcloud. Keep folders in sync, browse offline\
@@ -38,10 +38,10 @@ gallery:
 dependencies: []
 defaultUsername: umbrel
 deterministicPassword: true
-releaseNotes: Connect an existing Umbrel Files folder through the native app settings
-  picker. Share the same files with Drive and its Linux and Android clients, with
-  automatic indexing and owner-only access by default. Fix runtime asset delivery
-  during app updates.
+releaseNotes: Fix browser Internal Server Error caused by generic Redis/database names
+  colliding with other Umbrel apps. Use unique service aliases, migrate existing database-host
+  configuration before startup, and check the login page in app health checks. Files
+  integration and existing data are preserved.
 folderAccess:
 - id: umbrel-files
   name: Umbrel Files

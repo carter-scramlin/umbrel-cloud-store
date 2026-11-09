@@ -8,6 +8,12 @@ if [ ! -f /var/www/html/.umbrel-uid-1000 ]; then
   touch /var/www/html/.umbrel-uid-1000
   chown 1000:1000 /var/www/html/.umbrel-uid-1000
 fi
+# Existing installs can still have the generic dbhost persisted in config.php.
+# Install the deployment override before the upstream entrypoint calls occ.
+if [ -f /var/www/html/config/config.php ]; then
+  cp /opt/umbreldrive/drive.config.php /var/www/html/config/umbreldrive.config.php
+  chown 1000:1000 /var/www/html/config/umbreldrive.config.php
+fi
 # A nested app mount makes Docker create custom_apps as root before first-run
 # copying. Keep the parent writable for optional app installation.
 mkdir -p /var/www/html/custom_apps

@@ -85,3 +85,17 @@ remain unverified. This is a community preview.
 - Browser checks of the integration status and Open connected folder shortcut
   passed against the running local server; a real file created outside Drive was
   visible in the connected folder view.
+
+## Browser failure remediation, server 1.1.1
+
+A shared-network test reproduced 1.1.0 login responses alternating between HTTP
+200 and 500 when another Redis used the generic redis alias. The error log showed
+Redis authentication/session failures. Isolated Compose testing did not model
+this Umbrel deployment condition, and earlier Basic-auth file API checks did not
+prove browser-cookie sign-in.
+
+The fix assigns unique service aliases, overrides legacy dbhost configuration
+before startup, and makes health checks load the login page. New tests perform
+repeated login-page requests, real cookie/CSRF sign-in, authenticated Files access,
+and Devices & Files rendering under deliberate db/redis DNS collisions, including
+a container restart. Existing 1.1.0 test data and credentials were preserved.
