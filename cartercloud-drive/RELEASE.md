@@ -1,19 +1,27 @@
-# Umbrel Drive 1.1.2 — smaller browser downloads
+# Umbrel Drive 1.1.3 — faster file browsing
 
-Modern HTTPS browsers can download public static scripts and styles using Brotli.
-The largest initial script is 1,056,952 bytes instead of 1,217,320 bytes with gzip
-(13.2% smaller). Decoded contents are byte-identical. Older clients retain gzip or
-uncompressed responses, and versioned browser caching is unchanged. Dynamic pages,
-DAV, user downloads, and access controls retain upstream behavior.
+Open everyday files in a small browser built for Umbrel Drive. Folder navigation
+stays on the page and requests only the needed metadata. The initial browser loads
+about 28 KB of decoded JavaScript/CSS, instead of the full workspace's multi-megabyte
+bundles. Content-hashed assets keep browser caching safe across updates.
 
-Devices & Files now explains how to open Drive in the official Umbrel Android app:
-connect to the Umbrel host without a port, then select Apps → Umbrel Drive. Drive
-still requires its own sign-in. Native Umbrel Photos backup is separate from the
-Drive Android client's offline files and media uploads. Physical-phone compatibility
-remains to be verified; this is not a claim of native Drive sync in the official app.
+Browse and search the current folder, sort, upload files up to 256 MiB, create
+folders, rename, move, copy, favorite, and create/revoke read-only share links.
+Uploads do not replace existing files, and move/copy operations preserve conflicts.
+Images can be previewed on demand. No mass thumbnail generation runs during browsing.
+The same server handles authentication, file permissions, versions and native sync.
 
-Accounts, credentials, selected folders, and private Drive files are preserved.
-Native Linux and Android binaries remain version 1.0.0. The earlier shared-network
-browser-session fix remains covered by CI. The integration/feature roadmap in
-`docs/umbrel-drive-roadmap.md` identifies future work; those features are not shipped
-by this patch. This remains a community preview, not an official Umbrel product.
+**Full workspace** remains available for advanced sharing, version history, trash
+and recovery, team administration, office/viewer tools, and resumable large-file
+uploads. Its original URLs remain valid. Android and Linux client binaries remain
+version 1.0.0. This update does not change Android integration.
+
+Reopen Umbrel Drive from Umbrel to enter the faster browser. Existing bookmarks to
+/apps/files/... still open the full workspace. Accounts, app passwords, private data
+and selected Umbrel Files folders are preserved. Files written through native Files
+continue to follow their own recovery rules and automatic indexing interval.
+
+The opt-in full-workspace timing probe (`drivePerf=1`) and the fast browser's Speed
+info display measure row readiness locally. No timing telemetry leaves your server.
+See the repository's 1.1.3 speed verification record for methods, results and limits.
+This remains a community preview; it does not claim complete Synology feature parity.

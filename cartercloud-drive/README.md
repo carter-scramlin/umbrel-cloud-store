@@ -94,12 +94,26 @@ for the implementation sequence, acceptance tests, performance limits, and gaps.
 
 ## Browser performance
 
-Static browser scripts/styles negotiate Brotli on supported HTTPS browsers and
-retain gzip and identity fallbacks. Their existing versioned cache headers remain
-in place. PHP pages, DAV, file downloads, and authentication use upstream behavior.
-This reduces transfer size; it does not remove Nextcloud's JavaScript parsing cost.
-A new preview is benchmarked against the installed version before claiming changes
-in latency. See the roadmap for the current measurements and remaining work.
+The normal entry point is a lightweight browser. Navigate folders without reloading
+the application, search the current folder, sort, create folders, upload, rename,
+move, copy, favorite, and manage read-only share links. Open **Full workspace** for
+advanced sharing, version history, trash/recovery, team administration, office/viewer
+tools and resumable large transfers. The lightweight uploader accepts files up to
+256 MiB; larger/resumable uploads remain supported in the full workspace and clients.
+Existing /apps/files/... bookmarks continue to open the full workspace. Reopen the
+app from Umbrel to enter the faster view.
+
+The browser uses one small stylesheet and one script, cached by their content hashes.
+Brotli/gzip/identity negotiation remains enabled for static assets. The list requests
+only required DAV fields, renders 200 rows at a time, and adds more with Show more.
+It refreshes the visible folder every 30 seconds while idle; native Files' background
+indexing interval is separate. There is no recursive browser-side file scan or mass
+preview generation on folder entry.
+
+**Speed info** shows local row-readiness timings. They are not sent to another server.
+For comparison, the full workspace can display an opt-in diagnostic using
+`?drivePerf=1&drivePerfName=EXPECTED_VISIBLE_FILE`. Timing results and limitations are
+recorded in [the 1.1.3 speed report](../docs/umbrel-drive-1.1.3-speed.md).
 
 ## Linux
 

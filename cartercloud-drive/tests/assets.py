@@ -19,7 +19,9 @@ def fetch(path, encoding):
 def check_assets():
     assert 'brotli/' in subprocess.check_output(['curl', '--version'], text=True), 'curl needs Brotli support'
     for path in ['/dist/core-common.js?v=drive-test', '/core/css/server.css?v=drive-test',
-                 '/custom_apps/umbreldrive/css/drive.css?v=drive-test']:
+                 '/custom_apps/umbreldrive/css/drive.css?v=drive-test',
+                 '/custom_apps/umbreldrive/css/fast.css?v=drive-test',
+                 '/custom_apps/umbreldrive/js/fast.js?v=drive-test']:
         plain, identity = fetch(path, 'identity')
         gz, gzip_headers = fetch(path, 'gzip')
         br, brotli_headers = fetch(path, 'br, gzip')

@@ -28,6 +28,6 @@ occ theming:config primary_color '#635bff'
 occ theming:config background backgroundColor
 occ theming:config background_color '#f5f5fa'
 occ theming:config logo /var/www/html/custom_apps/umbreldrive/img/logo.svg
-occ config:system:set defaultapp --value=files
+occ config:system:set defaultapp --value=umbreldrive
 occ config:system:set knowledgebaseenabled --type=boolean --value=false
 occ background:cron

@@ -114,3 +114,20 @@ backup, source packaging, and asset-integrity regressions before publication.
 
 See [the measured baseline and roadmap](../docs/umbrel-drive-roadmap.md) for
 performance boundaries and features that remain planned.
+
+## Lightweight browser, server 1.1.3
+
+A real local browser exercised folder creation, file upload, Unicode/symbol rename,
+favoriting, copy, move, protected link creation/revocation, and deletion
+of disposable fixtures. An HTML-looking filename rendered as text. A 1,004-entry
+synthetic folder was used for alternating full-workspace/lightweight load trials and
+in-page navigation measurements. A stalled upload test initially outlived its CSRF
+session; after reloading, the bounded retry completed successfully.
+
+The dedicated regression verifies the authenticated default entry, anonymous denial,
+CSP nonces, no-store account HTML, a decoded JS/CSS budget, content-versioned caches,
+and cookie writes with valid/invalid CSRF tokens. Brotli/gzip/identity responses remain
+byte-identical. Browser timing does not establish Android behavior or the performance
+of arbitrary network shares, file formats, or much larger libraries.
+
+See [the 1.1.3 speed report](../docs/umbrel-drive-1.1.3-speed.md) for final measurements.

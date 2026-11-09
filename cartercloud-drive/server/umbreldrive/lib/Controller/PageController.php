@@ -15,20 +15,39 @@ class PageController extends Controller {
  }
  #[NoAdminRequired]
  #[NoCSRFRequired]
+ public function files(): TemplateResponse {
+  return new TemplateResponse('umbreldrive', 'files', [
+   'uid' => $this->session->getUser()->getUID(),
+   'displayName' => $this->session->getUser()->getDisplayName(),
+   'owner' => $this->session->getUser()->getUID() === 'umbrel',
+   'bridgeConnected' => in_array($this->config->getAppValue('umbreldrive', 'files_status', ''), ['connected', 'read-only'], true),
+   'full' => rtrim($this->urls->linkToRoute('files.view.index'), '/'),
+   'setup' => $this->urls->linkToRoute('umbreldrive.page.index'),
+   'security' => $this->urls->linkToRoute('settings.PersonalSettings.index', ['section' => 'security']),
+   'davRoot' => $this->urls->getAbsoluteURL('/remote.php/dav/files/'),
+   'ocs' => $this->urls->getAbsoluteURL('/ocs/v2.php/apps/files_sharing/api/v1/shares'),
+   'fileLink' => $this->urls->getAbsoluteURL('/f/'),
+   'logo' => $this->urls->imagePath('umbreldrive', 'logo.svg'),
+   'css' => $this->urls->linkTo('umbreldrive', 'css/fast.css') . '?v=' . substr(hash_file('sha256', __DIR__ . '/../../css/fast.css'), 0, 12),
+   'js' => $this->urls->linkTo('umbreldrive', 'js/fast.js') . '?v=' . substr(hash_file('sha256', __DIR__ . '/../../js/fast.js'), 0, 12),
+  ], TemplateResponse::RENDER_AS_BLANK);
+ }
+ #[NoAdminRequired]
+ #[NoCSRFRequired]
  public function index(): TemplateResponse {
   $origin = parse_url($this->urls->getAbsoluteURL('/'));
   $os = ($origin['scheme'] ?? 'https') . '://' . $origin['host'];
   return new TemplateResponse('umbreldrive', 'index', [
    'server' => $this->urls->getAbsoluteURL('/'),
    'umbrelHost' => $origin['host'],
-   'files' => $this->urls->linkToRoute('files.view.index'),
+   'files' => $this->urls->linkToRoute('umbreldrive.page.files'),
    'security' => $this->urls->linkToRoute('settings.PersonalSettings.index', ['section' => 'security']),
    'logo' => $this->urls->imagePath('umbreldrive', 'logo.svg'),
    'owner' => $this->session->getUser()?->getUID() === 'umbrel',
    'bridgeStatus' => $this->config->getAppValue('umbreldrive', 'files_status', 'disconnected'),
    'osSettings' => $os . '/?dialog=app-settings&app=cartercloud-drive&view=storage',
    'osFiles' => $os . '/files',
-   'bridgeFiles' => $this->urls->linkToRoute('files.view.index', ['dir' => '/Umbrel Files']),
+   'bridgeFiles' => $this->urls->linkToRoute('umbreldrive.page.files', ['dir' => '/Umbrel Files']),
   ]);
  }
 }

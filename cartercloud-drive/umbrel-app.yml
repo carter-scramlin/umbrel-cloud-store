@@ -2,7 +2,7 @@ manifestVersion: 2.0
 id: cartercloud-drive
 name: Umbrel Drive
 category: files
-version: 1.1.2
+version: 1.1.3
 tagline: Your files. Right at home.
 description: "A community drive for your Umbrel, with a clean file browser and native\
   \ Linux and Android clients built on Nextcloud. Keep folders in sync, browse offline\
@@ -32,17 +32,18 @@ path: /
 storage:
   dataRoot: data
 gallery:
+- https://raw.githubusercontent.com/carter-scramlin/umbrel-cloud-store/main/cartercloud-drive/assets/fast-browser.jpg
 - https://raw.githubusercontent.com/carter-scramlin/umbrel-cloud-store/main/cartercloud-drive/assets/files.jpg
 - https://raw.githubusercontent.com/carter-scramlin/umbrel-cloud-store/main/cartercloud-drive/assets/setup.jpg
 - https://raw.githubusercontent.com/carter-scramlin/umbrel-cloud-store/main/cartercloud-drive/assets/integration.jpg
 dependencies: []
 defaultUsername: umbrel
 deterministicPassword: true
-releaseNotes: Reduce the initial browser download with Brotli compression for static
-  scripts and styles, retaining gzip for older clients. Add official Umbrel Android
-  app setup guidance. Existing accounts, Files folder selections, and private files
-  are preserved. Native clients remain 1.0.0. See the integration and feature roadmap
-  for planned work and verification limits.
+releaseNotes: Open files faster with a lightweight browser and in-page folder navigation.
+  Browse, search the current folder, upload, create folders, rename, move, copy,
+  favorite, and manage read-only share links. The full workspace remains available
+  for history, recovery, team administration, and resumable large uploads. Existing
+  accounts, native clients, Files connections, and storage are preserved.
 folderAccess:
 - id: umbrel-files
   name: Umbrel Files
