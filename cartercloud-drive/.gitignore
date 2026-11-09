@@ -1,5 +1,11 @@
 /data/*
 !/data/.gitkeep
+!/data/nextcloud/
+!/data/postgres/
+/data/nextcloud/*
+/data/postgres/*
+!/data/nextcloud/.gitkeep
+!/data/postgres/.gitkeep
 __pycache__/
 *.pyc
 *.jks

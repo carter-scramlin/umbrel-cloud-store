@@ -52,6 +52,7 @@ services:
       PHP_MEMORY_LIMIT: 1024M
       APACHE_BODY_LIMIT: 0
       NEXTCLOUD_INIT_HTACCESS: 'true'
+      XDG_CACHE_HOME: /tmp/drive-cache
     volumes:
     - ${APP_DATA_DIR}/data/nextcloud:/var/www/html
     - ${APP_DATA_DIR}/server/umbreldrive:/var/www/html/custom_apps/umbreldrive:ro
@@ -83,7 +84,9 @@ services:
   cron:
     image: nextcloud:35.0.2-apache@sha256:d88929dc8386420b8963f86cabb667fdaf733eef9dcf8fc98e226801a32c023c
     restart: on-failure
-    entrypoint: /cron.sh
+    entrypoint:
+    - sh
+    - /opt/umbreldrive/cron-start.sh
     environment:
       REDIS_HOST: redis
       REDIS_HOST_PASSWORD: ${APP_PASSWORD}
@@ -91,9 +94,11 @@ services:
       POSTGRES_DB: drive
       POSTGRES_USER: drive
       POSTGRES_PASSWORD: ${APP_PASSWORD}
+      XDG_CACHE_HOME: /tmp/drive-cache
     volumes:
     - ${APP_DATA_DIR}/data/nextcloud:/var/www/html
     - ${APP_DATA_DIR}/server/umbreldrive:/var/www/html/custom_apps/umbreldrive:ro
+    - ${APP_DATA_DIR}/server:/opt/umbreldrive:ro
     depends_on:
       web:
         condition: service_healthy

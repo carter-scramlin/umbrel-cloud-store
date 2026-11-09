@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# SPDX-License-Identifier: AGPL-3.0-or-later
+set -euo pipefail
+APP_DIR="${APP_DATA_DIR:-$(readlink -f "$(dirname "${BASH_SOURCE[0]}")/..")}"
+# Only package code lives here; the data directory and selected Files folder are
+# never touched. Both this hook and the template are refreshed on Umbrel updates.
+mkdir -p "${APP_DIR}/server"
+base64 --decode "${APP_DIR}/drive-runtime.b64" | tar -xz --no-same-owner -C "${APP_DIR}/server"

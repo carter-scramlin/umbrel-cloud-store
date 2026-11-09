@@ -13,7 +13,10 @@ occ() {
 if ! occ status --output=json | grep -q '"installed":true'; then
   exit 0
 fi
+occ upgrade --no-interaction
 occ app:enable umbreldrive
+occ app:enable files_external
+php /opt/umbreldrive/files-bridge.php
 occ app:enable groupfolders
 occ app:disable firstrunwizard
 occ app:disable nextcloud_announcements

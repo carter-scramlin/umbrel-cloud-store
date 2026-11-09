@@ -22,13 +22,17 @@ jobs:
           echo "$RUNNER_TEMP/drive-venv/bin" >> "$GITHUB_PATH"
       - name: Start isolated server
         run: |
+          python3 cartercloud-drive/tools/package_runtime.py --check
           python3 cartercloud-drive/tests/prepare_compose.py "$RUNNER_TEMP/drive-test"
           docker compose --env-file "$RUNNER_TEMP/drive-test/test.env" -f "$RUNNER_TEMP/drive-test/compose.yml" -p umbrel-drive-ci up -d --wait --wait-timeout 420
       - name: Test file workflows and backup safety
         env:
           DRIVE_TEST_PASSWORD_FILE: ${{ runner.temp }}/drive-test/password.txt
+          DRIVE_TEST_FILES_DIR: ${{ runner.temp }}/drive-test/umbrel-files
         run: |
           python3 cartercloud-drive/tests/integration.py
+          python3 cartercloud-drive/tests/files_bridge.py
+          python3 cartercloud-drive/tests/files_mount_lifecycle.py --compose "$RUNNER_TEMP/drive-test/compose.yml" --env-file "$RUNNER_TEMP/drive-test/test.env" --project umbrel-drive-ci --fixtures "$RUNNER_TEMP/drive-test/choices"
           python3 cartercloud-drive/tests/test_backup.py
           python3 cartercloud-drive/tests/test_packaging.py
       - name: Fetch immutable native binaries
@@ -56,16 +60,17 @@ jobs:
           cp cartercloud-drive/clients/umbrel-drive-backup.* release-output/
           cp cartercloud-drive/FEATURES.md release-output/FEATURES.md
           cp cartercloud-drive/TESTING.md release-output/TESTING.md
+          git archive --format=zip --output=release-output/Umbrel-Drive-1.1.0-server-source.zip HEAD cartercloud-drive .github/workflows/umbrel-drive-release.yml umbrel-app-store.yml
           cd release-output
           sha256sum * > SHA256SUMS
-      - name: Publish community preview
+      - name: Publish Files integration preview
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          if gh release view umbrel-drive-v1.0.0 >/dev/null 2>&1; then
-            echo 'The immutable 1.0.0 release already exists; leaving it intact.'
+          if gh release view umbrel-drive-v1.1.0 >/dev/null 2>&1; then
+            echo 'The immutable 1.1.0 release already exists; leaving it intact.'
           else
-            gh release create umbrel-drive-v1.0.0 release-output/* --target "$GITHUB_SHA" --title 'Umbrel Drive 1.0.0 — community preview' --prerelease --notes-file cartercloud-drive/RELEASE.md
+            gh release create umbrel-drive-v1.1.0 release-output/* --target "$GITHUB_SHA" --title 'Umbrel Drive 1.1.0 — Files integration' --prerelease --notes-file cartercloud-drive/RELEASE.md
           fi
       - name: Stop isolated test server
         if: always()

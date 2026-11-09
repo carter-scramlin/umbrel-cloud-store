@@ -1,25 +1,24 @@
-# Umbrel Drive 1.0.0 — community preview
+# Umbrel Drive 1.1.0 — Files integration
 
-A Nextcloud-based edition with an Umbrel-inspired file browser, native Linux and
-Android clients, team folders, file versions, trash, sharing, and scheduled Linux
-upload-only backups. Installs alongside the original preview without migrating
-or overwriting it.
+Connect an existing folder using Umbrel’s native **Storage → Umbrel Files** picker.
+Use the same ordinary files in Umbrel Files, the Drive browser, and the Linux and
+Android clients. Changes made in Files are indexed automatically, typically within
+one minute; large libraries and network shares can take longer. The folder is
+restricted to the umbrel Drive account until explicitly shared.
 
-Downloads:
-- **Linux x86_64:** `Umbrel-Drive-1.0.0-linux-x86_64.AppImage`
-- **Android 9+:** `Umbrel-Drive-1.0.0-android.apk` (dedicated community signature)
-- **Optional Linux file-manager extensions:** `Umbrel-Drive-1.0.0-shell-integration.zip`
-- **Complete branded client sources:** the Linux and Android source archives
-- **Checksums:** `SHA256SUMS`
+This server update preserves existing private Drive files, uses Umbrel’s user ID
+for connected-folder writes, and fixes delivery of theme/integration code during
+app updates. Changing folders uses separate cache identities so old links cannot
+expose same-named files in the replacement. Clearing the selection does not delete
+any of the folder’s files.
 
-The Linux client was compiled and checked under a virtual X11/D-Bus session;
-its native sync engine uploaded a file and downloaded a server-side edit.
-The Android generic release compiled, passed release lint, and its APK signature
-and zip alignment were verified. Physical Android-device QA remains outstanding.
-Server API and backup-helper checks are documented in the app's TESTING.md.
+Native client binaries remain version **1.0.0** and use the same signed Android
+APK and Linux AppImage as the earlier release. They are included here unchanged
+with their SHA-256 checksums and complete corresponding sources. Server package
+version 1.1.0 is in the community store and the server-source archive.
 
-This is not full Synology Drive parity. See the
-[feature matrix](https://github.com/carter-scramlin/umbrel-cloud-store/blob/main/cartercloud-drive/FEATURES.md),
-including the limits around Android folder-pair sync, push notifications,
-on-demand Linux files, office editing, search indexing, and proprietary Synology
-integrations. This is community software, not an official Umbrel product.
+This remains community software powered by Nextcloud, not an official Umbrel
+product or full Synology Drive parity. See FEATURES.md for the coverage matrix,
+TESTING.md for verification limits, and README.md for backup and recovery behavior.
+Android general bidirectional folder-pair sync, independent push credentials,
+Synology protocols, and advanced office/OCR services are not included.

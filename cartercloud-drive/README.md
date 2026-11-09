@@ -17,7 +17,7 @@ official Umbrel product. Read [feature coverage](FEATURES.md) before migrating.
 2. Install **Umbrel Drive** (`cartercloud-drive`, port **8390**).
 3. Open the app using the trusted HTTPS app URL provided by Umbrel.
 4. Sign in as **umbrel**, using the generated app password shown by Umbrel.
-5. Open **Get the apps** from the app menu to connect your devices.
+5. Open **Devices & Files** from the app menu to connect your devices.
 
 Initial startup downloads the pinned Nextcloud, PostgreSQL, and Redis containers
 and a checksum-verified Team folders 23.0.1 archive. Allow several minutes. If
@@ -32,6 +32,49 @@ If you use a separate reverse proxy, configure its trusted address explicitly an
 keep upload limits/timeouts appropriate to your files. No public access is set up
 by this package.
 
+## Works with Umbrel Files
+
+Open **Umbrel → app settings → Umbrel Drive → Storage → Umbrel Files** and
+choose the folder to connect. The same native picker supports Home, external
+drives, and network shares. Open **Devices & Files** in Drive for shortcuts and
+connection status. No folder is exposed until you select one.
+
+The selected folder appears as **Umbrel Files** in the **umbrel** Drive account.
+Files saved there by the browser, Linux sync, or Android are ordinary files in
+the selected Umbrel Files folder. Edits, renames, and deletions affect those same
+files. Out-of-band changes from Files are indexed automatically, typically within
+one minute; large libraries and slow network shares can take longer. Background
+jobs and scans run sequentially without overlapping. Regular Drive folders keep
+using private app storage; existing files are not moved into the connected folder.
+
+Other Drive accounts cannot browse this folder unless the owner explicitly shares
+it. Umbrel user membership and Drive accounts are separate: Drive sharing does
+not copy Umbrel Files' per-user sharing permissions. Choosing a folder grants
+this app read/write access to that folder. The server writes as Umbrel's UID/GID
+1000:1000 and never recursively changes ownership or permissions in your chosen
+folder. A genuinely read-only location stays read-only. If a personal folder or
+mount already uses the name Umbrel Files, rename it in Drive before connecting.
+
+Changing the selection disconnects the previous folder and gives the replacement
+its own storage/cache identity, preventing old public links from pointing at
+same-named files in a different folder. Clearing the setting revokes the mount;
+it does not delete the selected folder's files. Some external/network filesystems
+change their root identity when remounted; in that case existing shares may need
+to be recreated. The first scan and each restart
+reconcile the connection automatically.
+
+Changes made through Drive use Drive's versions and trash. Changes made directly
+in Umbrel Files bypass Drive's version history; recover Files deletions through
+Umbrel Files' own Trash. Back up the selected folder **as well as** Drive's app
+metadata/database. External and network folders follow their own availability,
+permissions, recovery, and backup rules. Avoid choosing another application's
+private data or the legacy preview's object store.
+
+For local HTTPS, install your Umbrel certificate using **Settings → Network →
+Advanced settings → HTTPS certificate** on the devices you connect. Keep certificate
+validation enabled. With a separate app-only reverse-proxy hostname, open native
+Umbrel settings/Files through your usual Umbrel address instead of the shortcuts.
+
 ## Linux
 
 Download `Umbrel-Drive-1.0.0-linux-x86_64.AppImage` from the
@@ -43,7 +86,7 @@ chmod +x Umbrel-Drive-1.0.0-linux-x86_64.AppImage
 ./Umbrel-Drive-1.0.0-linux-x86_64.AppImage
 ```
 
-Enter the **exact HTTPS app address** from Get the apps. Sign in in the browser,
+Enter the **exact HTTPS app address** from Devices & Files. Sign in in the browser,
 approve the device, and choose a local folder. Use selective sync to choose folders.
 The client preserves upstream conflict handling, bandwidth settings, multiple
 accounts, and pause/resume. Its independent identity keeps it separate from an

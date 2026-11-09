@@ -2,8 +2,8 @@
 <info xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://apps.nextcloud.com/schema/apps/info.xsd">
  <id>umbreldrive</id><name>Umbrel Drive</name><summary>A home for your files</summary>
  <description>Umbrel Drive theme and device setup. Community software powered by Nextcloud.</description>
- <version>1.0.0</version><licence>agpl</licence><author>Carter Cloud</author>
+ <version>1.1.0</version><licence>agpl</licence><author>Carter Cloud</author>
  <namespace>UmbrelDrive</namespace><category>files</category>
  <dependencies><nextcloud min-version="35" max-version="35"/></dependencies>
- <navigations><navigation><id>umbreldrive</id><name>Get the apps</name><route>umbreldrive.page.index</route><icon>app.svg</icon><order>90</order></navigation></navigations>
+ <navigations><navigation><id>umbreldrive</id><name>Devices &amp; Files</name><route>umbreldrive.page.index</route><icon>app.svg</icon><order>90</order></navigation></navigations>
 </info>

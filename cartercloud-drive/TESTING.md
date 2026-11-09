@@ -58,7 +58,30 @@
 
 ## Limits
 
-A live umbrelOS installation was not modified during development. Community-store
-refresh, Umbrel HTTPS/proxy behavior, device access, backup restoration, arm64
-runtime behavior, large-file and multi-user load tests, and long-running failure
-recovery require target-device validation. This is a community preview.
+The 1.0.0 package was installed through the connected umbrelOS 2.1.0-beta.1
+App Store on an amd64 device and reached ready. The integration update is also
+checked through a fresh isolated Compose install and an upgrade from 1.0.0.
+The browser's local Umbrel HTTPS certificate is not trusted in this automation
+profile, so live HTTPS browser interaction remains unverified. Certificate
+validation was not bypassed. Android physical-device behavior, backup restoration,
+arm64 runtime, large-library/load behavior, and long-running failure recovery
+remain unverified. This is a community preview.
+
+## Umbrel Files integration, server 1.1.0
+
+- A real selected-folder fixture passed ordinary-file round trips between the
+  filesystem and Drive DAV: creation, content checks, editing, rename, and deletion.
+- The background worker detected out-of-band changes and updated ancestor ETags
+  without manually running an index command. Drive-created files use UID/GID 1000.
+- A second account could not access the folder until it was explicitly shared.
+- Umbrel's package linter passes image/platform and manifest checks with zero
+  errors. One intentional warning concerns Redis's `no-new-privileges` hardening.
+- Runtime source is bundled reproducibly into a top-level template and installed
+  by the update-whitelisted pre-start hook. A stale-bundle check runs in CI.
+- A fresh no-folder installation, connection to folder A, replacement with folder B,
+  and clearing the folder all passed. An old public link did not expose a same-named
+  file in folder B, both original folders remained intact, and private Drive files
+  survived the restart sequence.
+- Browser checks of the integration status and Open connected folder shortcut
+  passed against the running local server; a real file created outside Drive was
+  visible in the connected folder view.

@@ -7,6 +7,7 @@ that every device and operating-system combination has been tested here.
 | Synology Drive capability | Umbrel Drive implementation | Status |
 |---|---|---|
 | Web file browser, folders, sorting, grid/list | Nextcloud Files with Umbrel Drive theme | Included |
+| Native Umbrel Files integration | Folder picker, same files, UID 1000, owner-only local storage mount, automatic indexing | Round-trip and isolation integration tested |
 | Name search, favorites, tags, recent files | Files and unified search | Included |
 | File previews, photos, PDF viewing | Viewer, Photos, PDF viewer | Included; codec/format limits apply |
 | Upload, download, move, copy, rename | WebDAV and Files | API integration tested |
