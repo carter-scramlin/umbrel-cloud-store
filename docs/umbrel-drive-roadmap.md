@@ -220,8 +220,10 @@ reported browsing delay.
 
 ## Faster default browser — 1.1.3
 
-The 1.1.3 candidate implements the smaller default file browser described in phase 3,
+The published 1.1.3 release implements the smaller default file browser described in phase 3,
 while retaining the full workspace for advanced tools. The controlled local test
 measured a 95.4% lower median first-row readiness time on a 1,004-entry folder. See
 [the complete speed report](umbrel-drive-1.1.3-speed.md) for raw samples, definitions
 and limits. Android integration remains unchanged and awaits the user's follow-up.
+
+Version 1.1.3 was installed and verified on the live Umbrel; the complete speed report includes the production HTTP checks and script/style transfer sizes.

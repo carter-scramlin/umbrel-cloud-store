@@ -267,3 +267,5 @@ Unofficial community packaging; no affiliation with Umbrel, Pydio, OpenCloud, Fi
 Application software retains its upstream licenses. Packaging is MIT licensed.
 
 Umbrel Drive: [Android integration, performance findings, and feature roadmap](docs/umbrel-drive-roadmap.md).
+
+Umbrel Drive 1.1.3: [measured browser speed improvements and verification](docs/umbrel-drive-1.1.3-speed.md).

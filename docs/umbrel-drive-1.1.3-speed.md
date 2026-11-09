@@ -89,11 +89,39 @@ production data and is not counted as a successful first attempt.
 
 ## Live deployment and limits
 
-The release workflow and live update results are recorded after the release gates
-finish. The live NAS still requires HTTPS cookie/CSRF and file-access verification;
-local UI timings must not be presented as a live browser measurement. Very large
-libraries, slow network shares, complex documents, physical Android behavior and
-long-duration sync remain outside this benchmark.
+The [full regression workflow](https://github.com/carter-scramlin/umbrel-cloud-store/actions/runs/42610163187)
+passed and [1.1.3 was published](https://github.com/carter-scramlin/umbrel-cloud-store/releases/tag/umbrel-drive-v1.1.3).
+Runtime commit: `fb6b8e9c6ec2fb8c64edf2ef355578919b6c2c76`.
+The installed app was updated in place and reached **ready, version 1.1.3**. Its
+existing Files selection was preserved. Live HTTPS cookie/CSRF sign-in, the default
+fast-browser redirect, private no-store HTML, setup/full-workspace access and a
+successful selected-folder Depth-1 listing passed on LAN and the usual Umbrel
+hostname. TLS verification and hostname checks stayed enabled with a process-local
+certificate pin; no browser security warning was bypassed.
+
+The real HTTPS proxy served exactly two initial script/style files totaling
+**8,904 Brotli bytes** (28,098 decoded bytes). The previous full-workspace inventory
+was 1,701,962 bytes: approximately **99.5% less initial script/style transfer**. This
+comparison excludes document HTML, icons/fonts and folder-response data.
+
+Seven live HTTP samples per route, including connection overhead:
+
+| Response on installed 1.1.3 | LAN median | Tailscale median |
+|---|---:|---:|
+| Fast browser HTML | 81.5 ms | 144.3 ms |
+| Retained full-workspace HTML | 168.4 ms | 175.0 ms |
+| Connected folder DAV listing | 136.5 ms | 121.3 ms |
+
+These are HTTP measurements, not a live browser render benchmark. The connected
+folder was essentially empty. The 1,004-entry browser result above is from the
+isolated development environment. The baseline 1.1.2 full-workspace HTML medians
+were 109.0 ms on LAN and 184.7 ms over Tailscale, so network/host variance remains
+visible; the strongest verified improvement is removal of the large frontend
+startup workload. Very large libraries, slow network shares, complex documents,
+physical Android behavior and long-duration sync remain outside this benchmark.
+
+Temporary live credentials were deleted after verification, and local test
+containers were stopped. The live app remains running.
 
 Reopen Umbrel Drive from Umbrel after updating. Old /apps/files/... bookmarks keep
 opening the full workspace. The connected Umbrel Files folder and native clients
