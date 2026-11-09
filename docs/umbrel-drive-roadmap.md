@@ -1,6 +1,6 @@
 # Umbrel Drive: Android integration, performance, and feature plan
 
-Prepared 9 November 2026 against community server 1.1.1, the proposed 1.1.2 patch,
+Prepared 9 November 2026 against community server 1.1.1, the 1.1.2 patch,
 Nextcloud 35.0.2, and umbrelOS 2.1.0-beta.1. Planned work below is not shipped
 unless explicitly identified as part of 1.1.2. This remains a community app.
 
@@ -147,6 +147,7 @@ feature is not equivalent to physical-device QA. The existing
 | File history and trash | Included for Drive-mediated changes | Policy UI, consistent whole-folder rollback and recovery across native edits; P1 |
 | Linux two-way/selective sync | Branded native client tested for transfer round trip | Supported distro/shell matrix, conflict UX, resume/large-transfer soak tests; P1 |
 | Linux on-demand files | Experimental upstream implementation | Filesystem/kernel QA and safe hydration/eviction; P2 |
+| Linux one-way folder tasks | No general one-way upload/download task UI; upload-only backup helper is separate | Add explicit direction/rules and deletion policy; P2 |
 | Desktop computer backup | Separate upload-only full-snapshot helper | Incremental storage, retention, scheduling UI and restore wizard; P1 |
 | Android offline, camera upload, scanning | Included in separate Drive APK; device QA pending | Real-phone battery/reconnect/offline-edit tests; P1 |
 | Arbitrary Android one/two-way folder tasks | Not included | Scoped-storage folder grants, conflict-safe queue, pause/rules and retries; P2; separate client or upstream |
@@ -163,6 +164,8 @@ feature is not equivalent to physical-device QA. The existing
 | Cross-server replication | WebDAV/federation available; no managed replication UI | Scheduled one/two-way jobs, permissions policy, conflicts and recovery; P3 |
 | Watermarks and restricted-download policies | No complete policy engine configured | Evaluate compatible access-control/editor features; do not promise protection for downloaded copies; P3 |
 | Optional semantic search and summaries | Not bundled | Permission-aware local model/index, explicit resource budget, source links; P3 |
+| Public internet share links | Link permissions work; no public endpoint is automatically configured | Optional trusted HTTPS publishing with explicit scope, correct URLs and abuse controls; P2 |
+| Migration from cloud drives or NAS | No turnkey migration wizard | Import/export ordinary files, export proprietary documents, verify counts/hashes and ownership; P2 |
 | End-to-end encryption | Not enabled or claimed | Optional encrypted spaces only after client/recovery compatibility testing; full server search and preview cannot operate on opaque content; P3 |
 | Backup/disaster recovery | Operator must back up private app state and connected folder | Consistent DB/file backup, retention, integrity verification and a tested restore; P1 |
 
@@ -188,3 +191,29 @@ plans in Google's product. References:
 Priority order: **reliable and fast browsing → official-app compatibility → safe
 recovery/backup → office and content search → advanced mobile sync and policies**.
 Feature parity is a roadmap, not a claim made by the 1.1.2 patch.
+
+## Delivery record
+
+Server 1.1.2 was published in the Carter Cloud community store and as a
+[preview release](https://github.com/carter-scramlin/umbrel-cloud-store/releases/tag/umbrel-drive-v1.1.2).
+The [full regression workflow](https://github.com/carter-scramlin/umbrel-cloud-store/actions/runs/42568034065)
+passed browser-cookie sessions under deliberate database/cache name collisions,
+restart persistence, seven grouped file API tests, static asset integrity, native
+Files round trips, selected-folder replacement/disconnect isolation, backup safety,
+and source packaging. Native client binaries were verified against their existing
+checksums; they were not rebuilt for this server-only patch.
+
+The installed app was updated in place to 1.1.2 and reached ready. Its existing
+selected folder remained connected. Live HTTPS cookie/CSRF sign-in and authenticated
+Files/setup access passed on both LAN and the normal Umbrel hostname. Through
+Umbrel's real HTTPS proxy, the 50 referenced script/style resources transferred
+**1,701,962 bytes versus 1,898,302 bytes before (10.3% less)**. Twenty-four resources
+negotiated Brotli, and all requests succeeded. The largest script remained 13.2%
+smaller; the decoded application code is unchanged.
+
+Repeated page/folder timings varied in both directions: LAN Files HTML median
+160 → 137 ms and folder listing 222 → 181 ms; Tailscale HTML 124 → 162 ms and
+listing 164 → 230 ms. These small samples do **not** establish a consistent latency
+improvement or an update regression. The patch changes static transfer, not the
+DAV implementation. Further browser tracing is still necessary to resolve the
+reported browsing delay.
