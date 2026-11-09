@@ -1,0 +1,44 @@
+manifestVersion: 2.0
+id: cartercloud-drive
+name: Umbrel Drive
+category: files
+version: 1.0.0
+tagline: Your files. Right at home.
+description: 'A community drive for your Umbrel, with a clean file browser and native Linux
+  and Android clients built on Nextcloud. Keep folders in sync, browse offline on Android,
+  automatically upload photos, share files with passwords and expiry dates, collect uploads,
+  and recover deleted files and previous versions. Manage users, groups, quotas, and connected
+  devices.
+
+
+  Sign in as umbrel with the generated app password. Open Get the apps to download clients
+  and connect them to this app''s HTTPS address. Linux scheduled upload-only backups use
+  the included backup helper. Advanced office editing, and full-text search require additional
+  Nextcloud apps or services. See the feature matrix for gaps compared with Synology Drive.
+  This is community software, not an official Umbrel or Synology product.
+
+
+  This edition installs separately from the original Umbrel Drive Preview. Existing preview
+  data is not migrated automatically. Server files and PostgreSQL are stored in this app''s
+  persistent data directory.'
+developer: Carter Cloud
+website: https://github.com/carter-scramlin/umbrel-cloud-store/tree/main/cartercloud-drive
+repo: https://github.com/carter-scramlin/umbrel-cloud-store
+support: https://github.com/carter-scramlin/umbrel-cloud-store/issues
+submitter: Carter Scramlin
+submission: https://github.com/carter-scramlin/umbrel-cloud-store
+icon: https://raw.githubusercontent.com/carter-scramlin/umbrel-cloud-store/main/cartercloud-drive/server/umbreldrive/img/logo.svg
+port: 8390
+requiresHttps: true
+path: /
+storage:
+  dataRoot: data
+gallery:
+- https://raw.githubusercontent.com/carter-scramlin/umbrel-cloud-store/main/cartercloud-drive/assets/files.jpg
+- https://raw.githubusercontent.com/carter-scramlin/umbrel-cloud-store/main/cartercloud-drive/assets/setup.jpg
+dependencies: []
+defaultUsername: umbrel
+deterministicPassword: true
+releaseNotes: Nextcloud-based edition with an Umbrel-inspired theme, native client branding,
+  PostgreSQL, Redis locking, and scheduled Linux backup support. Installs alongside the
+  original preview to preserve existing data.

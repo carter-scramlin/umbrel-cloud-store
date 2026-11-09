@@ -1,0 +1,14 @@
+<?php
+// SPDX-License-Identifier: AGPL-3.0-or-later
+?>
+<div class="drive-setup"><div class="drive-inner">
+ <div class="drive-top"><div><p class="drive-eyebrow">At home. Everywhere.</p><h1>Your files.<br>All together.</h1><p class="drive-lead">A little space of your own. Keep your files close, your devices in sync, and your favorite moments safe at home.</p></div><img class="drive-art" src="<?php p($_['logo']); ?>" alt="Umbrel Drive" width="180" height="180"></div>
+ <div class="drive-server"><strong>Your server address</strong><code><?php p($_['server']); ?></code></div>
+ <div class="drive-grid">
+  <section class="drive-card"><div class="drive-os" aria-hidden="true"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg></div><h2>Made for your Linux desktop.</h2><p>Keep folders in sync in the background. Choose what stays on your computer, share from your file manager, and pick up where you left off.</p><a class="drive-button" href="https://github.com/carter-scramlin/umbrel-cloud-store/releases/tag/umbrel-drive-v1.0.0" target="_blank" rel="noreferrer">Linux client downloads ↗</a></section>
+  <section class="drive-card"><div class="drive-os" aria-hidden="true"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M10 18h4"/></svg></div><h2>Right there on Android.</h2><p>Browse on the go, keep files available offline, scan documents, and automatically back up your photos when you connect to Wi-Fi.</p><a class="drive-button" href="https://github.com/carter-scramlin/umbrel-cloud-store/releases/tag/umbrel-drive-v1.0.0" target="_blank" rel="noreferrer">Android client downloads ↗</a></section>
+ </div>
+ <a class="drive-button drive-secondary" href="<?php p($_['files']); ?>">Open my files →</a>
+ <div class="drive-steps"><h2>A home for every device.</h2><ol><li><strong>Install the client</strong>Download the Linux AppImage or Android APK. Release notes identify which builds have been verified.</li><li><strong>Connect your Umbrel</strong>Enter the server address above. Sign in in your browser and approve your device.</li><li><strong>Make yourself at home</strong>Choose your folders on Linux, or turn on automatic uploads in Android settings.</li></ol></div>
+ <p class="drive-note">Community software by Carter Cloud, powered by Nextcloud. Not an official Umbrel or Synology product. Use a trusted HTTPS address for device connections. Manage connected devices in <a href="<?php p($_['security']); ?>">Security settings</a>. Native builds and source are published in the linked release; upstream Nextcloud clients can also connect to this server.</p>
+</div></div>

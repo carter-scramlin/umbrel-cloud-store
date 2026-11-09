@@ -1,0 +1,50 @@
+{
+  "version": "1.0.0",
+  "commit": "85e59fa2be0fae97717f55e8c2665e2854b551ac",
+  "files": [
+    {
+      "name": "Umbrel-Drive-1.0.0-linux-x86_64.AppImage",
+      "size": 62921208,
+      "sha256": "dbae004e7d3c4b568eeb6eef81570cf2e5f26a3c8cfb268ad7d94b90274bc7b6",
+      "compression": null,
+      "parts": [
+        "Umbrel-Drive-1.0.0-linux-x86_64.AppImage.part000",
+        "Umbrel-Drive-1.0.0-linux-x86_64.AppImage.part001",
+        "Umbrel-Drive-1.0.0-linux-x86_64.AppImage.part002",
+        "Umbrel-Drive-1.0.0-linux-x86_64.AppImage.part003",
+        "Umbrel-Drive-1.0.0-linux-x86_64.AppImage.part004",
+        "Umbrel-Drive-1.0.0-linux-x86_64.AppImage.part005",
+        "Umbrel-Drive-1.0.0-linux-x86_64.AppImage.part006",
+        "Umbrel-Drive-1.0.0-linux-x86_64.AppImage.part007",
+        "Umbrel-Drive-1.0.0-linux-x86_64.AppImage.part008",
+        "Umbrel-Drive-1.0.0-linux-x86_64.AppImage.part009",
+        "Umbrel-Drive-1.0.0-linux-x86_64.AppImage.part010",
+        "Umbrel-Drive-1.0.0-linux-x86_64.AppImage.part011",
+        "Umbrel-Drive-1.0.0-linux-x86_64.AppImage.part012",
+        "Umbrel-Drive-1.0.0-linux-x86_64.AppImage.part013",
+        "Umbrel-Drive-1.0.0-linux-x86_64.AppImage.part014",
+        "Umbrel-Drive-1.0.0-linux-x86_64.AppImage.part015"
+      ]
+    },
+    {
+      "name": "Umbrel-Drive-1.0.0-android.apk",
+      "size": 112441879,
+      "sha256": "c59653b9823e7f5c85d56206626e6f9ca88190ac2ed514191f38ba051b7f3090",
+      "compression": "gzip",
+      "parts": [
+        "Umbrel-Drive-1.0.0-android.apk.gz.part000",
+        "Umbrel-Drive-1.0.0-android.apk.gz.part001",
+        "Umbrel-Drive-1.0.0-android.apk.gz.part002",
+        "Umbrel-Drive-1.0.0-android.apk.gz.part003",
+        "Umbrel-Drive-1.0.0-android.apk.gz.part004",
+        "Umbrel-Drive-1.0.0-android.apk.gz.part005",
+        "Umbrel-Drive-1.0.0-android.apk.gz.part006",
+        "Umbrel-Drive-1.0.0-android.apk.gz.part007",
+        "Umbrel-Drive-1.0.0-android.apk.gz.part008",
+        "Umbrel-Drive-1.0.0-android.apk.gz.part009",
+        "Umbrel-Drive-1.0.0-android.apk.gz.part010",
+        "Umbrel-Drive-1.0.0-android.apk.gz.part011"
+      ]
+    }
+  ]
+}

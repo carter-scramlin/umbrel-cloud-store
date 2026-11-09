@@ -1,0 +1,74 @@
+name: Umbrel Drive release
+on:
+  push:
+    branches: [main]
+    paths: ['cartercloud-drive/**', '.github/workflows/umbrel-drive-release.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: umbrel-drive-release
+  cancel-in-progress: false
+jobs:
+  verify-and-release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Prepare Python tools
+        run: |
+          python3 -m venv "$RUNNER_TEMP/drive-venv"
+          "$RUNNER_TEMP/drive-venv/bin/pip" install Pillow==12.1.0 PyYAML==6.0.3
+          echo "$RUNNER_TEMP/drive-venv/bin" >> "$GITHUB_PATH"
+      - name: Start isolated server
+        run: |
+          python3 cartercloud-drive/tests/prepare_compose.py "$RUNNER_TEMP/drive-test"
+          docker compose --env-file "$RUNNER_TEMP/drive-test/test.env" -f "$RUNNER_TEMP/drive-test/compose.yml" -p umbrel-drive-ci up -d --wait --wait-timeout 420
+      - name: Test file workflows and backup safety
+        env:
+          DRIVE_TEST_PASSWORD_FILE: ${{ runner.temp }}/drive-test/password.txt
+        run: |
+          python3 cartercloud-drive/tests/integration.py
+          python3 cartercloud-drive/tests/test_backup.py
+      - name: Fetch immutable native binaries
+        run: |
+          asset_commit=$(python3 -c 'import json; print(json.load(open("cartercloud-drive/clients/release-assets.json"))["commit"])')
+          git fetch --depth=1 origin "$asset_commit"
+          mkdir -p "$RUNNER_TEMP/drive-assets" release-output
+          git archive FETCH_HEAD release-assets | tar -x -C "$RUNNER_TEMP/drive-assets"
+          python3 cartercloud-drive/clients/assemble_release.py "$RUNNER_TEMP/drive-assets/release-assets" release-output
+      - name: Package corresponding branded sources
+        run: |
+          git clone --depth 1 --branch v35.0.3 https://github.com/nextcloud/desktop.git "$RUNNER_TEMP/drive-linux-source"
+          git clone --depth 1 --branch stable-35.0.2 https://github.com/nextcloud/android.git "$RUNNER_TEMP/drive-android-source"
+          python3 cartercloud-drive/clients/brand.py linux "$RUNNER_TEMP/drive-linux-source"
+          python3 cartercloud-drive/clients/brand.py android "$RUNNER_TEMP/drive-android-source"
+          python3 - "$RUNNER_TEMP/drive-linux-source" <<'PY'
+          from pathlib import Path
+          import sys
+          root=Path(sys.argv[1])
+          p=root/'NEXTCLOUD.cmake';p.write_text(p.read_text().replace(' CACHE STRING "URL for updater"',''))
+          p=root/'admin/linux/build-appimage.sh';p.write_text(p.read_text().replace('mkdir /app','mkdir -p /app').replace('mkdir build-client','mkdir -p build-client'))
+          PY
+          python3 cartercloud-drive/clients/package_sources.py "$RUNNER_TEMP/drive-linux-source" "$RUNNER_TEMP/drive-android-source" release-output
+          cp cartercloud-drive/clients/backup.py release-output/umbrel-drive-backup.py
+          cp cartercloud-drive/clients/umbrel-drive-backup.* release-output/
+          cp cartercloud-drive/FEATURES.md release-output/FEATURES.md
+          cp cartercloud-drive/TESTING.md release-output/TESTING.md
+          cd release-output
+          sha256sum * > SHA256SUMS
+      - name: Publish community preview
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view umbrel-drive-v1.0.0 >/dev/null 2>&1; then
+            echo 'The immutable 1.0.0 release already exists; leaving it intact.'
+          else
+            gh release create umbrel-drive-v1.0.0 release-output/* --target "$GITHUB_SHA" --title 'Umbrel Drive 1.0.0 — community preview' --prerelease --notes-file cartercloud-drive/RELEASE.md
+          fi
+      - name: Stop isolated test server
+        if: always()
+        run: |
+          if [ -f "$RUNNER_TEMP/drive-test/compose.yml" ]; then
+            docker compose --env-file "$RUNNER_TEMP/drive-test/test.env" -f "$RUNNER_TEMP/drive-test/compose.yml" -p umbrel-drive-ci down
+          fi

@@ -197,6 +197,15 @@ and moving app data still need verification on the target device.
 
 ## Umbrel Drive
 
+The Nextcloud-based edition (`cartercloud-drive`, HTTPS port **8390**) includes
+native Linux and Android clients, an Umbrel-inspired theme, multi-user accounts,
+Team folders, versions, trash, protected sharing, and upload-only Linux backups.
+Read the [setup guide and feature limits](cartercloud-drive/README.md) and get
+[client downloads](https://github.com/carter-scramlin/umbrel-cloud-store/releases/tag/umbrel-drive-v1.0.0).
+It installs separately from the preview so existing preview data stays intact.
+
+### Umbrel Drive Preview (legacy)
+
 A community preview with a web file browser, expiring share links, version
 history, Trash, a Linux sync and backup agent, and an installable Android web
 client. Requires umbrelOS 2.0 and trusted HTTPS. See the
@@ -210,7 +219,8 @@ client. Requires umbrelOS 2.0 and trusted HTTPS. See the
 | OpenCloud | 8385 | 9443 (HTTPS) |
 | Filestash | 8386 | None |
 | T3 Code | 8387 (HTTPS) | None |
-| Umbrel Drive | 8388 (HTTPS) | None |
+| Umbrel Drive | 8390 (HTTPS) | None |
+| Umbrel Drive Preview | 8388 (HTTPS) | None |
 
 Check these are unused on your server before installing.
 

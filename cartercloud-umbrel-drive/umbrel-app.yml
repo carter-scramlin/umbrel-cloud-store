@@ -1,6 +1,6 @@
 manifestVersion: 2.0
 id: cartercloud-umbrel-drive
-name: Umbrel Drive
+name: Umbrel Drive Preview
 category: files
 version: "0.1.0"
 tagline: Keep your files in sync with your Umbrel

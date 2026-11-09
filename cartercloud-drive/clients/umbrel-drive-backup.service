@@ -1,0 +1,9 @@
+[Unit]
+Description=Umbrel Drive upload-only backup
+Wants=network-online.target
+After=network-online.target
+[Service]
+Type=oneshot
+ExecStart=%h/.local/bin/umbrel-drive-backup run
+UMask=0077
+NoNewPrivileges=true
