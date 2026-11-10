@@ -2,14 +2,16 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 """Package complete branded client trees, excluding generated build caches."""
 import argparse
+import json
 from pathlib import Path
 import tarfile
 import zipfile
 
 p=argparse.ArgumentParser();p.add_argument('linux',type=Path);p.add_argument('android',type=Path);p.add_argument('output',type=Path)
-a=p.parse_args();a.output.mkdir(parents=True,exist_ok=True)
+a=p.parse_args();spec=json.loads((Path(__file__).parent/'sources.json').read_text());a.output.mkdir(parents=True,exist_ok=True)
 for label,root in [('linux',a.linux),('android',a.android)]:
- target=a.output/f'Umbrel-Drive-1.0.0-{label}-source.tar.gz'
+ version=spec[label].get('clientVersion','1.0.0')
+ target=a.output/f'Umbrel-Drive-{version}-{label}-source.tar.gz'
  def filter_member(member):
   if any(p in {'.git','.gradle','.kotlin','.cxx','build','build-client','node_modules'} for p in Path(member.name).parts):return None
   if member.name.endswith(('.AppImage','.log','.apk','.idsig')):return None

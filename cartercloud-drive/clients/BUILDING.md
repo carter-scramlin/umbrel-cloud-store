@@ -34,3 +34,8 @@ Upstream copyright and license notices are preserved. Consult `LICENSES/` and
 `COPYING` in the source archives. Qt and other shared libraries bundled by the
 upstream AppImage builder retain their original licenses; their build recipes are
 in [Nextcloud continuous-integration](https://github.com/nextcloud/continuous-integration).
+
+Android client 1.1.0 retains the original package ID and signing key. Its version
+code is 350000291, above the initial upstream-derived 350000290; the visible
+version is independent of the pinned Nextcloud engine version. The branding step
+replaces the actual login logo and gives the splash name/tagline separate lines.

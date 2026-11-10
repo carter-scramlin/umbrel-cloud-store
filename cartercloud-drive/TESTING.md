@@ -1,3 +1,28 @@
+# 1.2 release candidate verification
+
+The current candidate's complete results and remaining stable-release gates are
+recorded in [release readiness](../docs/umbrel-drive-release-readiness.md).
+Android 1.1.0 rebuilt successfully with lint, Detekt and Spotless. Its APK
+version code is 350000291, and signature/16 KB alignment checks passed with the
+original signing certificate. The APK SHA-256 is
+`dfac8c8b70782810573fe826dafe5b922ecd95093319dcf9c127ce8d7a058ad3`.
+Native sign-in/upload/offline QA is pending the owner's private-certificate trust
+decision; the APK installation and launch were checked for 1.0.0.
+
+New checks cover chunked uploads, no-overwrite conflicts, cancellation, native
+photo originals, stopped-snapshot restore, and the official Umbrel Android app.
+Final candidate assets total **34,883 decoded bytes**: 24,890 bytes of JavaScript
+and 9,993 bytes of CSS; Brotli is **10,790 bytes** combined. The one-script/one-style
+100 KB budget, CSP, cache isolation, and cookie/CSRF checks passed. This is an asset
+measurement, not a browser paint or folder-readiness benchmark.
+
+A 1,004-file isolated folder returned its complete DAV XML in **130.32 ms median**
+over seven cookie/CSRF-authenticated warm requests (one warmup excluded). Samples:
+128.94, 130.01, 140.20, 130.32, 133.02, 142.95, 121.31 ms. This measures the
+server request/body, not browser rendering, cold cache, live LAN or phone speed.
+
+The 1.0/1.1 verification history below remains scoped to its original versions.
+
 # Verification record — 2026-11-08
 
 ## Server and packaging

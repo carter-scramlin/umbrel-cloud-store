@@ -1,27 +1,36 @@
-# Umbrel Drive 1.1.3 — faster file browsing
+# Umbrel Drive 1.2.0 release candidate
 
-Open everyday files in a small browser built for Umbrel Drive. Folder navigation
-stays on the page and requests only the needed metadata. The initial browser loads
-about 28 KB of decoded JavaScript/CSS, instead of the full workspace's multi-megabyte
-bundles. Content-hashed assets keep browser caching safe across updates.
+This candidate completes everyday mobile navigation and large browser uploads,
+and adds an optional connection to originals backed up by the official Umbrel app.
+It is community software powered by Nextcloud, with no claim of Umbrel endorsement
+or complete Google/Synology feature parity.
 
-Browse and search the current folder, sort, upload files up to 256 MiB, create
-folders, rename, move, copy, favorite, and create/revoke read-only share links.
-Uploads do not replace existing files, and move/copy operations preserve conflicts.
-Images can be previewed on demand. No mass thumbnail generation runs during browsing.
-The same server handles authentication, file permissions, versions and native sync.
+- Mobile Browse Drive menu exposes Files, recovery, sharing, account security,
+  device setup, full workspace, and Back to Umbrel. Larger touch targets and
+  reduced-motion support improve keyboard and phone use.
+- Uploads above 8 MiB use Chunking v2 in 8 MiB parts, with progress, cancellation,
+  and up to two retries of a chunk interrupted by a network error. Files up to
+  16 GiB are accepted by the browser. Reloading closes the upload; cross-reload
+  resume is not implemented. Native clients remain best for long transfers.
+- Existing files are never overwritten. Cancellation removes private temporary
+  chunks, and failed cleanup expires after 24 hours. Completed files are kept.
+  An ambiguous final response is never automatically replayed: check the folder
+  before retrying. Favorite updates check per-property DAV results.
+- Optional Storage → Umbrel Photos selection mounts photo originals read-only
+  for the umbrel Drive account. Use Home/Photos for official mobile backups;
+  manage backup and deletion in Umbrel Photos. Other accounts require an explicit
+  Drive share. This neither replaces nor broadens the existing Files connection.
+- Official Umbrel Android app uses Apps → Umbrel Drive with a separate Drive
+  login. A fork is unnecessary for this supported launch path. Offline files and
+  Drive auto-upload use the separate native Drive client, version 1.1.0.
 
-**Full workspace** remains available for advanced sharing, version history, trash
-and recovery, team administration, office/viewer tools, and resumable large-file
-uploads. Its original URLs remain valid. Android and Linux client binaries remain
-version 1.0.0. This update does not change Android integration.
+Android 1.1.0 also corrects the login logo and splash layout, retains the existing
+package/signing identity, and reports its own version. Linux remains 1.0.0.
 
-Reopen Umbrel Drive from Umbrel to enter the faster browser. Existing bookmarks to
-/apps/files/... still open the full workspace. Accounts, app passwords, private data
-and selected Umbrel Files folders are preserved. Files written through native Files
-continue to follow their own recovery rules and automatic indexing interval.
-
-The opt-in full-workspace timing probe (`drivePerf=1`) and the fast browser's Speed
-info display measure row readiness locally. No timing telemetry leaves your server.
-See the repository's 1.1.3 speed verification record for methods, results and limits.
-This remains a community preview; it does not claim complete Synology feature parity.
+The 1.1.3 browser speed report remains a historical baseline. This candidate
+measured a 130 ms median server response for a 1,004-file folder using a cookie
+session; it is not a new browser-rendering benchmark.
+See TESTING.md and docs/umbrel-drive-release-readiness.md for this candidate's
+results, limitations, and remaining stable-release gates. Accounts, device app
+passwords, selected folders and private storage are preserved; no data migration
+or uninstall is required. Back up app data and connected folders separately.

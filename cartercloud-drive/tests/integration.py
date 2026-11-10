@@ -8,6 +8,7 @@ import json
 import os
 import time
 import unittest
+import uuid
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -16,7 +17,7 @@ import xml.etree.ElementTree as ET
 BASE = os.environ.get('DRIVE_TEST_URL', 'http://127.0.0.1:18390')
 ADMIN = os.environ.get('DRIVE_TEST_PASSWORD') or Path(os.environ['DRIVE_TEST_PASSWORD_FILE']).read_text().strip()
 NS = {'d':'DAV:', 'oc':'http://owncloud.org/ns', 'nc':'http://nextcloud.org/ns'}
-USER = 'drive-test-' + str(int(time.time()))
+USER = 'drive-test-' + uuid.uuid4().hex[:20]
 PASSWORD = 'Testing-only-VeryLong-' + str(time.time_ns())
 
 

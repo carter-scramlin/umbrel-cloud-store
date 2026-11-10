@@ -2,23 +2,22 @@ manifestVersion: 2.0
 id: cartercloud-drive
 name: Umbrel Drive
 category: files
-version: 1.1.3
+version: 1.2.0-rc.1
 tagline: Your files. Right at home.
-description: "A community drive for your Umbrel, with a clean file browser and native\
-  \ Linux and Android clients built on Nextcloud. Keep folders in sync, browse offline\
-  \ on Android, automatically upload photos, share files with passwords and expiry\
-  \ dates, collect uploads, and recover deleted files and previous versions. Manage\
-  \ users, groups, quotas, and connected devices.\n\nSign in as umbrel with the generated\
-  \ app password. Open Devices & Files to download clients and connect them to this app's\
-  \ HTTPS address. Linux scheduled upload-only backups use the included backup helper.\
-  \ Advanced office editing, and full-text search require additional Nextcloud apps\
-  \ or services. See the feature matrix for gaps compared with Synology Drive. This\
-  \ is community software, not an official Umbrel or Synology product.\n\nThis edition\
-  \ installs separately from the original Umbrel Drive Preview. Existing preview data\
-  \ is not migrated automatically. Connect a folder in Umbrel app settings \u2192\
-  \ Storage \u2192 Umbrel Files. The same files are then accessible in Files and the\
-  \ umbrel Drive account; other accounts require an explicit share. Drive metadata\
-  \ and PostgreSQL stay in the app's private data directory."
+description: "A community drive for your Umbrel, with a clean file browser and native Linux\
+  \ and Android clients built on Nextcloud. Keep folders in sync, browse offline on Android,\
+  \ automatically upload photos, share files with passwords and expiry dates, collect uploads,\
+  \ and recover deleted files and previous versions. Manage users, groups, quotas, and connected\
+  \ devices.\n\nSign in as umbrel with the generated app password. Open Devices & Files to download\
+  \ clients and connect them to this app's HTTPS address. Linux scheduled upload-only backups\
+  \ use the included backup helper. Advanced office editing, and full-text search require additional\
+  \ Nextcloud apps or services. See the feature matrix for gaps compared with Synology Drive.\
+  \ This is community software, not an official Umbrel or Synology product.\n\nThis edition\
+  \ installs separately from the original Umbrel Drive Preview. Existing preview data is not\
+  \ migrated automatically. Connect a folder in Umbrel app settings \u2192 Storage \u2192 Umbrel\
+  \ Files. The same files are then accessible in Files and the umbrel Drive account; other accounts\
+  \ require an explicit share. Drive metadata and PostgreSQL stay in the app's private data\
+  \ directory."
 developer: Carter Cloud
 website: https://github.com/carter-scramlin/umbrel-cloud-store/tree/main/cartercloud-drive
 repo: https://github.com/carter-scramlin/umbrel-cloud-store
@@ -39,17 +38,17 @@ gallery:
 dependencies: []
 defaultUsername: umbrel
 deterministicPassword: true
-releaseNotes: Open files faster with a lightweight browser and in-page folder navigation.
-  Browse, search the current folder, upload, create folders, rename, move, copy,
-  favorite, and manage read-only share links. The full workspace remains available
-  for history, recovery, team administration, and resumable large uploads. Existing
-  accounts, native clients, Files connections, and storage are preserved.
+releaseNotes: 'Release candidate for the community release: complete mobile navigation, chunked
+  uploads with progress and cancellation, no-overwrite conflict protection, interrupted-chunk
+  retries, and an optional read-only Umbrel Photos connection for official mobile backups. Existing
+  accounts, Files connections, and clients are preserved. See TESTING.md for verified behavior
+  and outstanding release gates.'
 folderAccess:
 - id: umbrel-files
   name: Umbrel Files
-  note: Choose the folder to connect to Drive. Its contents appear as Umbrel Files
-    for the umbrel Drive account. Other accounts need an explicit share. Changes in
-    either app affect the same files.
+  note: Choose the folder to connect to Drive. Its contents appear as Umbrel Files for the umbrel
+    Drive account. Other accounts need an explicit share. Changes in either app affect the same
+    files.
   mounts:
   - service: web
     targetPath: /umbrel-files
@@ -57,3 +56,15 @@ folderAccess:
   - service: cron
     targetPath: /umbrel-files
     readOnly: false
+- id: umbrel-photos
+  name: Umbrel Photos
+  note: 'Optional: select Home/Photos to browse backups from the official Umbrel mobile app
+    in Drive. Read-only; only the umbrel Drive account can see these photos until explicitly
+    shared. Photo backup and deletion stay in Umbrel Photos.'
+  mounts:
+  - service: web
+    targetPath: /umbrel-photos
+    readOnly: true
+  - service: cron
+    targetPath: /umbrel-photos
+    readOnly: true

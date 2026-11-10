@@ -26,6 +26,7 @@ class TestReleasePackaging(unittest.TestCase):
                     self.assertIn('import GObject, '+api,data)
                     self.assertIn("appname = 'UmbrelDrive'",data)
                     self.assertIn('# SPDX-FileCopyrightText: Nextcloud contributors',data)
+            self.assertTrue((output/'Umbrel-Drive-1.1.0-android-source.tar.gz').is_file())
             with tarfile.open(output/'Umbrel-Drive-1.0.0-linux-source.tar.gz') as archive:
                 names=archive.getnames()
                 self.assertTrue(any(n.endswith('/syncstate.py') for n in names))

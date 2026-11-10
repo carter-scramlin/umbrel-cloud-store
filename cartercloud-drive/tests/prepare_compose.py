@@ -12,6 +12,7 @@ import yaml
 p=argparse.ArgumentParser();p.add_argument('output',type=Path);p.add_argument('--port',type=int,default=18390);p.add_argument('--no-files',action='store_true');args=p.parse_args()
 root=Path(__file__).resolve().parents[1]
 out=args.output.resolve();out.mkdir(parents=True,exist_ok=True)
+photos=out/'umbrel-photos';photos.mkdir(exist_ok=True);photos.chmod(0o755)
 folder=out/'umbrel-files';folder.mkdir(exist_ok=True);folder.chmod(0o777)
 # Exercise the same rendered template and pre-start hook Umbrel uses on updates.
 shutil.copyfile(root/'drive-runtime.b64.template',out/'drive-runtime.b64')
@@ -26,6 +27,7 @@ for service in c['services'].values():
 if not args.no_files:
  for name in ['web','cron']:
   c['services'][name]['volumes'].append(str(folder)+':/umbrel-files')
+  c['services'][name]['volumes'].append(str(photos)+':/umbrel-photos:ro')
 (out/'compose.yml').write_text(yaml.safe_dump(c,sort_keys=False))
 password=secrets.token_urlsafe(32)
 (out/'test.env').write_text('APP_PASSWORD='+password+'\nAPP_DOMAIN=localhost\n')

@@ -63,3 +63,8 @@ body[data-themes*="dark"] .drive-setup {background:#20202b;color:#eee;}
 body[data-themes*="dark"] .drive-setup h1,body[data-themes*="dark"] .drive-setup h2,body[data-themes*="dark"] .drive-steps strong {color:#eee;}
 body[data-themes*="dark"] .drive-card,body[data-themes*="dark"] .drive-server {background:#292936;border-color:#363646;}
 body[data-themes*="dark"] .drive-card p,body[data-themes*="dark"] .drive-lead,body[data-themes*="dark"] .drive-steps li {color:#b7b5ca;}
+
+/* Match the guest background to the selected dark theme instead of forcing light. */
+body[data-themes*="dark"]#body-login{background:radial-gradient(ellipse at 25% 0%,#282340,transparent 65%),#14141d!important;}
+#body-login .logo{width:88px!important;height:88px!important;margin-inline:auto;}
+#body-login main{box-shadow:0 12px 45px #201b3320!important;}

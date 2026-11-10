@@ -36,6 +36,8 @@ def check_fast_browser():
         assert 'no-store' in response.headers.get('Cache-Control', ''), 'Do not cache account HTML'
     assert 'Full workspace' in page and 'Devices &amp; Files' in page
     assert 'data-uid="umbrel"' in page
+    assert 'data-upload-root=' in page and 'id="navigation-toggle"' in page
+    assert 'Back to Umbrel' in page and 'aria-controls="drive-sidebar"' in page
     assert 'core-common.js' not in page and '/dist/' not in page
     scripts = re.findall(r'<script[^>]+src="([^"]+)"', page)
     styles = re.findall(r'<link[^>]+rel="stylesheet"[^>]+href="([^"]+)"', page)

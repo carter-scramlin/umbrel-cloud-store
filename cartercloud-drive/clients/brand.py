@@ -79,6 +79,14 @@ def android(root):
     verify(root, 'android')
     gradle = root / 'app/build.gradle.kts'
     text = gradle.read_text().replace('applicationId = "com.nextcloud.client"', f'applicationId = "{APP_ID}"')
+    # Preserve an upgrade path from the original upstream-derived version code.
+    text = re.sub(r'\n        // Umbrel Drive client release\n        versionCode = \d+\n        versionName = "[^\"]+"\n', '', text)
+    marker = '        // adapt structure from Eclipse to Gradle/Android Studio expectations;'
+    if marker not in text:
+        raise ValueError('Upstream Android version location changed')
+    text = text.replace(marker, '        // Umbrel Drive client release\n'
+                        f'        versionCode = {SPEC["android"]["versionCode"]}\n'
+                        f'        versionName = "{SPEC["android"]["clientVersion"]}"\n\n' + marker)
     gradle.write_text(text)
     setup = root / 'app/src/main/res/values/setup.xml'
     text = setup.read_text()
@@ -127,8 +135,20 @@ def android(root):
  <path android:fillColor="#ffffff" android:pathData="M201,173L311,173L256,274ZM127,305L182,204L237,305ZM275,305L330,204L385,305ZM183,321L329,321L307,355L205,355Z"/>
 </vector>
 '''
-    for name in ['ic_launcher_foreground.xml', 'nextcloud_logo.xml']:
+    for name in ['ic_launcher_foreground.xml', 'nextcloud_logo.xml', 'logo.xml']:
         (res / 'drawable' / name).write_text(vector)
+    # The upstream splash places two short brand fragments side by side. Our
+    # full name/tagline need separate centered lines, including on narrow phones.
+    splash = res / 'layout/activity_splash.xml'
+    layout = subprocess.check_output(['git', '-C', str(root), 'show',
+                                      'HEAD:app/src/main/res/layout/activity_splash.xml'], text=True)
+    layout = layout.replace('android:orientation="horizontal"', 'android:orientation="vertical"')
+    layout = layout.replace('android:gravity="center_horizontal"', 'android:gravity="center_horizontal"\n        android:paddingHorizontal="24dp"')
+    layout = layout.replace('android:text="@string/splashScreenNormal"', 'android:text="@string/splashScreenNormal"\n            android:paddingTop="8dp"\n            android:gravity="center"')
+    layout = layout.replace('android:text="@string/splashScreenBold"', 'android:text="@string/splashScreenBold"\n            android:gravity="center"')
+    # Only the second text size changes; the title retains upstream typography.
+    layout = layout.replace('android:textSize="@dimen/splash_text_size" />', 'android:textSize="16sp" />')
+    splash.write_text(layout)
     (res / 'drawable/ic_launcher_background.xml').write_text('''<?xml version="1.0" encoding="utf-8"?>
 <!-- SPDX-FileCopyrightText: 2026 Carter Cloud -->
 <!-- SPDX-License-Identifier: AGPL-3.0-or-later -->

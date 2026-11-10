@@ -98,8 +98,9 @@ The normal entry point is a lightweight browser. Navigate folders without reload
 the application, search the current folder, sort, create folders, upload, rename,
 move, copy, favorite, and manage read-only share links. Open **Full workspace** for
 advanced sharing, version history, trash/recovery, team administration, office/viewer
-tools and resumable large transfers. The lightweight uploader accepts files up to
-256 MiB; larger/resumable uploads remain supported in the full workspace and clients.
+tools. The lightweight uploader accepts files up to 16 GiB in small chunks, with
+progress, cancellation, and interrupted-chunk retries. Uploads do not resume after
+reloading the page. The full workspace and native clients offer their own transfer tools.
 Existing /apps/files/... bookmarks continue to open the full workspace. Reopen the
 app from Umbrel to enter the faster view.
 
@@ -118,7 +119,7 @@ recorded in [the 1.1.3 speed report](../docs/umbrel-drive-1.1.3-speed.md).
 ## Linux
 
 Download `Umbrel-Drive-1.0.0-linux-x86_64.AppImage` from the
-[release](https://github.com/carter-scramlin/umbrel-cloud-store/releases/tag/umbrel-drive-v1.0.0).
+[release](https://github.com/carter-scramlin/umbrel-cloud-store/releases/tag/umbrel-drive-v1.2.0-rc.1).
 Make it executable, then launch it:
 
 ```sh
@@ -142,7 +143,7 @@ new Umbrel Drive releases explicitly.
 
 ## Android
 
-Download and install `Umbrel-Drive-1.0.0-android.apk` from the release. Android may
+Download and install `Umbrel-Drive-1.1.0-android.apk` from the release. Android may
 ask you to allow installation from the browser or file manager you are using.
 The APK is signed with a dedicated community key and uses the independent package
 ID `io.github.carterscramlin.umbreldrive`. It can coexist with the Nextcloud app.
@@ -242,3 +243,22 @@ licenses as specified in upstream SPDX headers. Team folders:
 [nextcloud/groupfolders](https://github.com/nextcloud/groupfolders), AGPL.
 New theme and packaging code in this directory: AGPL-3.0-or-later.
 The repository's root MIT license does not replace these licenses.
+
+## Official mobile app and native Photos
+
+The official Umbrel Android app can launch Drive from **Apps → Umbrel Drive**.
+Connect it to the Umbrel host without port 8390; use the Drive account inside the
+opened app. Its photo backup continues to use Umbrel Photos. For offline Drive
+files and Drive-specific auto-upload, use the separate native Drive APK.
+
+To make those official photo backups visible in Drive, optionally choose
+**Storage → Umbrel Photos → Home/Photos** in Umbrel's app settings. This is an
+independent read-only connection; the existing Umbrel Files selection stays in
+place. Only the umbrel Drive account sees the originals until explicitly shared.
+Other Umbrel members' private photo libraries are not connected automatically.
+Manage photo backup and deletion in Umbrel Photos. This connection does not copy
+or migrate the originals and must be included separately in server backups.
+
+This is a release candidate. See [release readiness](../docs/umbrel-drive-release-readiness.md)
+for concrete validation and the stable-release gates. Community maintenance and
+branding are independent of Umbrel, Synology and Google.

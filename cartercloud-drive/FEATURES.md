@@ -6,8 +6,9 @@ that every device and operating-system combination has been tested here.
 
 | Synology Drive capability | Umbrel Drive implementation | Status |
 |---|---|---|
-| Web file browser, folders, sorting, grid/list | Lightweight list browser by default; full Nextcloud workspace retains grid/list and advanced tools | Included; lightweight uploads ≤256 MiB, larger/resumable transfers in full workspace or clients |
-| Official Umbrel Android app | Open from Apps using its existing WebView; native Files reaches the selected folder | Documented/source-supported path; physical-phone QA pending; separate Drive login |
+| Web file browser, folders, sorting, grid/list | Lightweight list browser by default; full Nextcloud workspace retains grid/list and advanced tools | Included; lightweight uploads ≤16 GiB, larger/resumable transfers in full workspace or clients |
+| Official mobile photo originals | Optional separate read-only folder slot, normally Home/Photos | Owner-only until explicitly shared; photo backup/deletion stay in Umbrel Photos |
+| Official Umbrel Android app | Open from Apps using its existing WebView; native Files reaches the selected folder | Official Play app paired in Android 13 VM; launch/login verification recorded in release readiness; physical-phone QA pending; separate Drive login |
 | Native Umbrel Files integration | Folder picker, same files, UID 1000, owner-only local storage mount, automatic indexing | Round-trip and isolation integration tested |
 | Name search, favorites, tags, recent files | Files and unified search | Included |
 | File previews, photos, PDF viewing | Viewer, Photos, PDF viewer | Included; codec/format limits apply |

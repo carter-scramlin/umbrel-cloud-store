@@ -1,0 +1,16 @@
+{
+  "environment": "isolated local Docker; cookie session; one warmup excluded; not a physical-device measurement",
+  "entries": 1004,
+  "dav_ms": [
+    128.94,
+    130.01,
+    140.2,
+    130.32,
+    133.02,
+    142.95,
+    121.31
+  ],
+  "median_ms": 130.32,
+  "response_bytes": 549939,
+  "measurement": "cookie/CSRF-authenticated DAV request including full XML body; not browser rendering or first-row readiness"
+}

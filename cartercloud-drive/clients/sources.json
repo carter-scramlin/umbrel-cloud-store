@@ -9,6 +9,8 @@
     "repository": "https://github.com/nextcloud/android.git",
     "tag": "stable-35.0.2",
     "commit": "9687c1ed2e5acf7945880b56fb2dbddd8833fc09",
-    "license": "AGPL-3.0-or-later AND GPL-2.0-only (see upstream SPDX headers)"
+    "license": "AGPL-3.0-or-later AND GPL-2.0-only (see upstream SPDX headers)",
+    "clientVersion": "1.1.0",
+    "versionCode": 350000291
   }
 }
