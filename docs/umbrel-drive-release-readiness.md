@@ -82,15 +82,18 @@ keyboard focus within file rows and continues for read-only folders.
    first as declined and then as a saved site-permission block, even after the owner
    explicitly approved access. No alternate surface is used to bypass that block.
 2. Native Drive Android 1.1.0 upload/download/offline smoke tests. Build, lint,
-   signature and source packaging were previously checked. The initial APK installed and launched in the VM; local DNS was unavailable,
+   signature and source packaging passed. Both the initial APK install and the
+   same-key upgrade to 1.1.0 succeeded in the VM; local DNS was unavailable,
    so direct LAN IP was tested. Its certificate dialog matches the live Umbrel
    SHA-256, and trust is waiting for the owner’s decision. Browser-source install
    permission was restored to disabled after installation. Android 1.1.0 fixes the
    observed upstream logo and run-on splash branding, builds with lint/Detekt/Spotless,
-   and passes signature/alignment checks with the original key. Its install/update
-   and physical-phone background media behavior remains a separate device QA limit.
-3. Green public CI for the exact candidate commit and matching release checksums.
-   Only then promote a fresh stable version/release. Never rewrite immutable assets.
+   and passes signature/alignment checks with the original key. The corrected splash
+   and sign-in logo rendered after upgrade. Upload/offline and physical-phone
+   background media behavior still require device QA.
+3. Green public CI for the exact candidate commit and matching release checksums
+   is now complete (publication verification below). Promote a fresh stable release
+   only after the remaining gates pass. Never rewrite immutable assets.
 
 Linux native binaries remain 1.0.0 and x86_64 only; ARM64 server support comes from
 pinned multiarchitecture images, not an ARM64 device test. Android remains Android
@@ -113,3 +116,32 @@ candidate asset and API measurements are recorded in TESTING.md after final chec
 [Official Android behavior](https://umbrel.com/support/getting-started/umbrel-for-android),
 [Nextcloud Chunking v2](https://docs.nextcloud.com/server/stable/developer_manual/client_apis/WebDAV/chunking.html),
 [Nextcloud release schedule](https://github.com/nextcloud/server/wiki/Maintenance-and-Release-Schedule).
+
+
+## Publication verification
+
+Public CI [42743505981](https://github.com/carter-scramlin/umbrel-cloud-store/actions/runs/42743505981)
+passed for candidate commit `37a0d73b1d8bd709654ede1fdebaabe945e72bef`.
+The [immutable candidate release](https://github.com/carter-scramlin/umbrel-cloud-store/releases/tag/umbrel-drive-v1.2.0-rc.1)
+published 16 assets. Android 1.1.0 reconstructed from asset commit
+`3e8a3c816e9e49c5586da9a1db22b1c59da5d54f` matches the signed local APK and the
+published SHA256SUMS. The published corresponding Android/Linux source archives
+and server source ZIP were downloaded and checksum-verified. This completes the
+public-CI/checksum gate above. The live Umbrel community-store catalog reports
+1.2.0-rc.1, while the installed server remains 1.1.3 and ready.
+
+The target-device observations used umbrelOS 2.1.0-beta.1 on amd64. Other OS/device
+combinations are not implied by that result. The original app data and the selected
+/Home/Umbrel Drive connection remain in place. No production uninstall, database
+reset, preview-data migration or automatic photo-folder selection was performed.
+
+
+## Native Android upgrade observation
+
+Android accepted the signed 1.1.0 APK as an update to the installed 1.0.0 client.
+The corrected splash and the Drive logo on the server-address screen were visually
+verified. The browser's permission to install unknown apps was restored to disabled
+after installation. During this session the Waydroid guest briefly showed black
+screens and its boot animation; it recovered without a forced VM reset. No cause
+was established, and this is not evidence of a diagnosed app crash. Native account
+sign-in/upload/offline tests remain pending the owner's certificate decision.
