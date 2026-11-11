@@ -201,7 +201,7 @@ The Nextcloud-based edition (`cartercloud-drive`, HTTPS port **8390**) includes
 native Linux and Android clients, an Umbrel-inspired theme, multi-user accounts,
 Team folders, versions, trash, protected sharing, and upload-only Linux backups.
 Read the [setup guide and feature limits](cartercloud-drive/README.md) and get
-[client downloads](https://github.com/carter-scramlin/umbrel-cloud-store/releases/tag/umbrel-drive-v1.2.0-rc.1).
+[client downloads](https://github.com/carter-scramlin/umbrel-cloud-store/releases/tag/umbrel-drive-v1.2.0-rc.2).
 The 1.2 release candidate adds complete mobile navigation, chunked browser uploads,
 and an optional read-only connection to official mobile photo backups. It retains
 shared-network sign-in fixes and connects a folder through Umbrel’s native **Storage → Umbrel Files**

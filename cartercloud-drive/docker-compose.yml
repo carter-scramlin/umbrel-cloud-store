@@ -42,6 +42,8 @@ services:
         aliases:
         - cartercloud-drive-redis
   web:
+    ports:
+    - 8391:80
     image: nextcloud:35.0.2-apache@sha256:d88929dc8386420b8963f86cabb667fdaf733eef9dcf8fc98e226801a32c023c
     restart: on-failure
     environment:

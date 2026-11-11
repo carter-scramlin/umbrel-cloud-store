@@ -118,13 +118,13 @@ recorded in [the 1.1.3 speed report](../docs/umbrel-drive-1.1.3-speed.md).
 
 ## Linux
 
-Download `Umbrel-Drive-1.0.0-linux-x86_64.AppImage` from the
-[release](https://github.com/carter-scramlin/umbrel-cloud-store/releases/tag/umbrel-drive-v1.2.0-rc.1).
+Download `Umbrel-Drive-1.1.0-linux-x86_64.AppImage` from the
+[release](https://github.com/carter-scramlin/umbrel-cloud-store/releases/tag/umbrel-drive-v1.2.0-rc.2).
 Make it executable, then launch it:
 
 ```sh
-chmod +x Umbrel-Drive-1.0.0-linux-x86_64.AppImage
-./Umbrel-Drive-1.0.0-linux-x86_64.AppImage
+chmod +x Umbrel-Drive-1.1.0-linux-x86_64.AppImage
+./Umbrel-Drive-1.1.0-linux-x86_64.AppImage
 ```
 
 Enter the **exact HTTPS app address** from Devices & Files. Sign in in the browser,
@@ -143,7 +143,7 @@ new Umbrel Drive releases explicitly.
 
 ## Android
 
-Download and install `Umbrel-Drive-1.1.0-android.apk` from the release. Android may
+Download and install `Umbrel-Drive-1.2.0-android.apk` from the release. Android may
 ask you to allow installation from the browser or file manager you are using.
 The APK is signed with a dedicated community key and uses the independent package
 ID `io.github.carterscramlin.umbreldrive`. It can coexist with the Nextcloud app.
@@ -262,3 +262,41 @@ or migrate the originals and must be included separately in server backups.
 This is a release candidate. See [release readiness](../docs/umbrel-drive-release-readiness.md)
 for concrete validation and the stable-release gates. Community maintenance and
 branding are independent of Umbrel, Synology and Google.
+
+
+## Your Umbrel and remote access
+
+Open **Your Umbrel** in Drive for account storage usage and the last reported
+Files/Photos connection state. Connected-folder banners explain where your files
+live and which recovery tools apply. **Copy to Umbrel Files** leaves the source in
+place and refuses an existing destination name.
+
+Install/connect Tailscale on your Umbrel and clients. In **Your Umbrel → Remote
+access**, the original umbrel Drive account can save its exact Tailscale IP or full
+`.ts.net` address, including the Drive port. This adds that host to Nextcloud's
+trusted domains; it never accepts a wildcard. Replacing or clearing the address
+removes a host added by this setting, while preserving pre-existing trusted hosts.
+No Tailscale key or password is collected. This setting does not join a tailnet or
+change its access policy.
+
+Android **Settings → Remote access** and the sign-in screen's **Remote access**
+button save local and Tailscale profiles. Linux exposes the same settings from
+**Network** and the sign-in wizard, with a read-only Tailscale CLI status check.
+The selected profile fills new sign-ins. Existing accounts retain their original
+address; this release does not reroute existing sync accounts or copy credentials
+between hosts. Sign in using the Tailscale address for use both at home and away.
+Never point two sync accounts at the same local folder.
+
+HTTPS remains on port **8390**. The plain HTTP endpoint is on **8391**, reachable
+on the device's interfaces. Enable **Allow HTTP addresses** in the native clients
+before choosing an HTTP URL. HTTP has no TLS encryption; use it only over a trusted
+connection such as Tailscale. There is no automatic HTTPS-to-HTTP downgrade and
+HTTPS certificate checks remain enabled. No public Funnel or router port forwarding
+is configured by Drive. Native connection profiles are private to that device and
+are not synchronized between clients.
+
+The separate upload-only backup helper also supports HTTP with an explicit
+`configure --allow-http` option (or boolean `"allow_http": true` in its private JSON
+configuration). It refuses every redirect, including cross-host or protocol
+changes, and keeps the existing symlink, no-overwrite and completion-marker rules.
+It uses its own configuration rather than inheriting the GUI connection profile.

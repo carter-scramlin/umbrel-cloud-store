@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SPDX-FileCopyrightText: 2026 Carter Cloud -->
+<!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent" android:layout_height="match_parent" android:fillViewport="true">
+ <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="24dp">
+  <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/umbrel_remote_title" android:textAppearance="?android:attr/textAppearanceLarge" android:paddingBottom="16dp"/>
+  <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/umbrel_remote_description" android:paddingBottom="16dp"/>
+  <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/umbrel_remote_local" android:labelFor="@id/umbrel_local_address"/>
+  <EditText android:id="@+id/umbrel_local_address" android:layout_width="match_parent" android:layout_height="wrap_content" android:inputType="textUri" android:singleLine="true" android:importantForAutofill="no"/>
+  <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/umbrel_remote_tailnet" android:labelFor="@id/umbrel_tailnet_address"/>
+  <EditText android:id="@+id/umbrel_tailnet_address" android:layout_width="match_parent" android:layout_height="wrap_content" android:inputType="textUri" android:singleLine="true" android:importantForAutofill="no"/>
+  <RadioGroup android:layout_width="match_parent" android:layout_height="wrap_content">
+   <RadioButton android:id="@+id/umbrel_use_local" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/umbrel_remote_local_mode"/>
+   <RadioButton android:id="@+id/umbrel_use_tailnet" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/umbrel_remote_tailnet_mode"/>
+  </RadioGroup>
+  <CheckBox android:id="@+id/umbrel_allow_http" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/umbrel_remote_http"/>
+  <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/umbrel_remote_http_note" android:paddingBottom="16dp"/>
+  <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/umbrel_remote_scope" android:paddingBottom="16dp"/>
+  <Button android:id="@+id/umbrel_open_tailscale" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/umbrel_remote_open"/>
+  <TextView android:id="@+id/umbrel_remote_error" android:layout_width="match_parent" android:layout_height="wrap_content" android:accessibilityLiveRegion="polite"/>
+  <Button android:id="@+id/umbrel_save_remote" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/umbrel_remote_save"/>
+ </LinearLayout>
+</ScrollView>

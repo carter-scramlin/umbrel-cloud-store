@@ -23,22 +23,30 @@ import uuid
 
 class NoRedirects(urllib.request.HTTPRedirectHandler):
     def redirect_request(self, req, fp, code, msg, headers, newurl):
-        raise RuntimeError('Server redirected a backup request. Configure the final HTTPS server address.')
+        raise RuntimeError('Server redirected a backup request. Configure the final server address.')
 
 
 class Backup:
     def __init__(self, config):
         self.config = config
         url = urllib.parse.urlsplit(config['url'])
-        if url.scheme != 'https' or not url.netloc or url.username or url.query or url.fragment:
-            raise ValueError('Use the final HTTPS server URL without credentials, a query, or a fragment.')
-        context = ssl.create_default_context(cafile=config.get('ca_file'))
-        self.opener = urllib.request.build_opener(NoRedirects(), urllib.request.HTTPSHandler(context=context))
+        allow_http = config.get('allow_http', False)
+        if type(allow_http) is not bool:
+            raise ValueError('allow_http must be true or false.')
+        if (url.scheme != 'https' and not (url.scheme == 'http' and allow_http)) or not url.hostname or url.username is not None or url.query or url.fragment:
+            raise ValueError('Use the final HTTPS URL without credentials, a query, or a fragment. Plain HTTP requires --allow-http over a trusted transport.')
+        if url.port is not None and not 1 <= url.port <= 65535:
+            raise ValueError('Use a server port between 1 and 65535.')
+        handlers = [NoRedirects()]
+        if url.scheme == 'https':
+            context = ssl.create_default_context(cafile=config.get('ca_file'))
+            handlers.append(urllib.request.HTTPSHandler(context=context))
+        self.opener = urllib.request.build_opener(*handlers)
         self.root = config['url'].rstrip('/') + '/remote.php/dav/files/' + urllib.parse.quote(config['user'], safe='')
         self.auth = 'Basic ' + base64.b64encode((config['user'] + ':' + config['password']).encode()).decode()
 
     def request(self, path, method, data=None, size=None):
-        headers = {'Authorization': self.auth, 'User-Agent':'UmbrelDriveBackup/1.0'}
+        headers = {'Authorization': self.auth, 'User-Agent':'UmbrelDriveBackup/1.1'}
         if size is not None: headers['Content-Length'] = str(size)
         if method == 'PUT': headers['If-None-Match'] = '*'
         req = urllib.request.Request(self.root + '/' + urllib.parse.quote(path, safe='/'),
@@ -99,6 +107,7 @@ class Backup:
 def configure(args):
     config = dict(url=args.url.rstrip('/'), user=args.user, folder=str(args.folder.expanduser().resolve()),
                   device=args.device, exclude=args.exclude, password=getpass.getpass('Device app password: '))
+    if args.allow_http: config['allow_http'] = True
     if args.ca_file: config['ca_file'] = str(args.ca_file.resolve())
     Backup(config)
     args.config.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
@@ -115,6 +124,7 @@ def main():
     c.add_argument('--url', required=True); c.add_argument('--user', required=True)
     c.add_argument('--folder', type=Path, required=True)
     c.add_argument('--device', default=socket.gethostname().split('.')[0])
+    c.add_argument('--allow-http', action='store_true', help='Allow plain HTTP over a trusted transport such as Tailscale.')
     c.add_argument('--ca-file', type=Path);c.add_argument('--exclude', action='append', default=[])
     sub.add_parser('run')
     args = p.parse_args()

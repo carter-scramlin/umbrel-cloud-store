@@ -9,16 +9,19 @@
  <link rel="icon" href="<?php p($_['logo']); ?>"><link rel="stylesheet" href="<?php p($_['css']); ?>">
  <?php emit_script_tag($_['js']); ?>
 </head>
-<body data-upload-root="<?php p($_['uploadRoot']); ?>" data-uid="<?php p($_['uid']); ?>" data-dav-root="<?php p($_['davRoot']); ?>" data-ocs="<?php p($_['ocs']); ?>" data-file-link="<?php p($_['fileLink']); ?>" data-full="<?php p($_['full']); ?>">
+<body data-remote-settings="<?php p($_['remoteSettings']); ?>" data-connections="<?php p($_['connections']); ?>" data-os-settings="<?php p($_['osSettings']); ?>" data-os-files="<?php p($_['osFiles']); ?>" data-setup="<?php p($_['setup']); ?>" data-security="<?php p($_['security']); ?>" data-upload-root="<?php p($_['uploadRoot']); ?>" data-uid="<?php p($_['uid']); ?>" data-dav-root="<?php p($_['davRoot']); ?>" data-ocs="<?php p($_['ocs']); ?>" data-file-link="<?php p($_['fileLink']); ?>" data-full="<?php p($_['full']); ?>">
  <a class="skip" href="#file-list">Skip to files</a>
  <button id="navigation-toggle" class="secondary mobile-navigation" aria-controls="drive-sidebar" aria-expanded="false">☰ <span>Browse Drive</span></button>
  <aside class="sidebar" id="drive-sidebar">
   <a class="brand" href="?dir=/"><img src="<?php p($_['logo']); ?>" alt="" width="36" height="36"><span>Umbrel Drive</span></a>
   <p class="eyebrow">Your space</p>
   <nav aria-label="Drive navigation">
+   <button id="your-umbrel" class="nav-item nav-button">⌂ <span>Your Umbrel</span></button>
    <a class="nav-item active" href="?dir=/" data-dir="/">▧ <span>My files</span></a>
-   <?php if ($_['owner'] && $_['bridgeConnected']): ?><a class="nav-item" href="?dir=/Umbrel%20Files" data-dir="/Umbrel Files">▱ <span>Umbrel Files</span></a><?php elseif ($_['owner']): ?><a class="nav-item" href="<?php p($_['setup']); ?>">▱ <span>Connect Umbrel Files</span></a><?php endif; ?>
-   <?php if ($_['owner'] && $_['photosConnected']): ?><a class="nav-item" href="?dir=/Umbrel%20Photos" data-dir="/Umbrel Photos">▧ <span>Umbrel Photos</span></a><?php endif; ?>
+   <?php if ($_['owner']): ?>
+   <a class="nav-item" data-library="files" href="<?php p($_['setup']); ?>">▱ <span>Umbrel Files</span></a>
+   <a class="nav-item" data-library="photos" href="<?php p($_['setup']); ?>">▧ <span>Umbrel Photos</span></a>
+   <?php endif; ?>
    <a class="nav-item" href="<?php p($_['full']); ?>/favorites">☆ <span>Favorites</span></a>
    <a class="nav-item" href="<?php p($_['full']); ?>/recent">◷ <span>Recent</span></a>
    <a class="nav-item" href="<?php p($_['full']); ?>/sharingin">♧ <span>Shared with me</span></a>
@@ -28,6 +31,7 @@
  </aside>
  <main>
   <header class="topbar"><div><p class="eyebrow">A little space of your own</p><h1 id="folder-title">My files</h1></div><label class="search"><span aria-hidden="true">⌕</span><input id="search" type="search" aria-label="Search this folder" placeholder="Search this folder" autocomplete="off"></label></header>
+  <section id="library-context" class="library-context" aria-label="Connected storage" hidden><div><strong id="library-name"></strong><p id="library-description"></p></div><a class="secondary" href="<?php p($_['osFiles']); ?>">Open Umbrel Files ↗</a></section>
   <div class="toolbar"><nav id="breadcrumbs" aria-label="Folder path"></nav><div class="tools"><button id="refresh" class="secondary" title="Refresh folder">↻ <span>Refresh</span></button><button id="new-folder" class="secondary">New folder</button><button id="upload" class="primary">↑ Upload files</button><input id="file-input" type="file" multiple hidden></div></div>
   <section id="transfer" class="transfer" aria-label="Upload progress" hidden><div><strong id="transfer-title"></strong><p id="transfer-detail" role="status"></p><progress id="transfer-progress" max="100" value="0"></progress></div><button id="cancel-upload" class="secondary">Cancel upload</button></section>
   <section class="files-panel" aria-label="Files">

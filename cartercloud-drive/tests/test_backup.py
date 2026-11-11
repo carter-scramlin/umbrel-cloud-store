@@ -1,5 +1,7 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 import importlib.util
+import http.server
+import threading
 import json
 from pathlib import Path
 import tempfile
@@ -45,8 +47,32 @@ class TestBackup(unittest.TestCase):
             self.assertFalse(any('complete.json' in x for x in seen))
 
     def test_requires_https_and_refuses_embedded_credentials(self):
-        for url in ['http://umbrel.local','https://user:secret@example.com','https://example.com/?token=secret']:
+        for url in ['http://umbrel.local','https://user:secret@example.com','https://example.com/?token=secret','https://example.com:0','https://example.com:65536']:
             with self.assertRaises(ValueError): module.Backup({'url':url})
+
+    def test_http_requires_boolean_opt_in(self):
+        for flag in [False, 'true', 'false', 1, None]:
+            with self.assertRaises(ValueError):
+                module.Backup({'url':'http://127.0.0.1:8391', 'allow_http':flag})
+
+    def test_explicit_http_sends_authenticated_no_overwrite_request(self):
+        seen=[]
+        class Handler(http.server.BaseHTTPRequestHandler):
+            def log_message(self, *args): pass
+            def do_PUT(self):
+                seen.append((self.path, self.headers.get('Authorization'),
+                    self.headers.get('If-None-Match'), self.rfile.read(int(self.headers['Content-Length']))))
+                self.send_response(201);self.end_headers()
+        server=http.server.ThreadingHTTPServer(('127.0.0.1',0),Handler)
+        worker=threading.Thread(target=server.serve_forever,daemon=True);worker.start()
+        try:
+            b=module.Backup({'url':f'http://127.0.0.1:{server.server_port}', 'user':'test-user',
+                'password':'disposable-test-secret', 'allow_http':True})
+            self.assertEqual(b.request('folder/café.txt','PUT',b'hello',5),201)
+            self.assertEqual(seen, [('/remote.php/dav/files/test-user/folder/caf%C3%A9.txt',
+                'Basic dGVzdC11c2VyOmRpc3Bvc2FibGUtdGVzdC1zZWNyZXQ=', '*', b'hello')])
+        finally:
+            server.shutdown();server.server_close();worker.join(timeout=3)
 
     def test_rejects_cross_host_redirect(self):
         with self.assertRaises(RuntimeError):

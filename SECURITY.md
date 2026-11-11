@@ -29,3 +29,16 @@ Sync and version history are not backups. Preserve the private app data and each
 connected folder. Back up PostgreSQL only with a consistent stopped snapshot or
 a coordinated logical dump. Never uninstall an app to troubleshoot or downgrade
 its database in place. Validate a restore in a separate installation first.
+
+
+## Optional HTTP and remote profiles
+
+The plain HTTP endpoint on device port 8391 is reachable on device interfaces;
+HTTPS on 8390 remains the default. HTTP does not encrypt credentials or file bytes.
+Use HTTP only over a trusted transport such as Tailscale, whose access policy must
+permit the devices. This project neither opens router forwarding nor enables Funnel.
+Native clients require explicit HTTP selection and retain HTTPS verification.
+Connection profiles only select new sign-ins; they never reuse an existing account's
+credentials at a different host. Server remote-host registration is authenticated,
+CSRF-protected, limited to the original umbrel account, and restricted to exact
+Tailscale IPs and `.ts.net` names. It stores no Tailscale auth keys.

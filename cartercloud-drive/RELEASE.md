@@ -1,36 +1,24 @@
-# Umbrel Drive 1.2.0 release candidate
+# Umbrel Drive 1.2.0-rc.2
 
-This candidate completes everyday mobile navigation and large browser uploads,
-and adds an optional connection to originals backed up by the official Umbrel app.
-It is community software powered by Nextcloud, with no claim of Umbrel endorsement
-or complete Google/Synology feature parity.
+This community candidate adds integration controls that belong with your Umbrel:
 
-- Mobile Browse Drive menu exposes Files, recovery, sharing, account security,
-  device setup, full workspace, and Back to Umbrel. Larger touch targets and
-  reduced-motion support improve keyboard and phone use.
-- Uploads above 8 MiB use Chunking v2 in 8 MiB parts, with progress, cancellation,
-  and up to two retries of a chunk interrupted by a network error. Files up to
-  16 GiB are accepted by the browser. Reloading closes the upload; cross-reload
-  resume is not implemented. Native clients remain best for long transfers.
-- Existing files are never overwritten. Cancellation removes private temporary
-  chunks, and failed cleanup expires after 24 hours. Completed files are kept.
-  An ambiguous final response is never automatically replayed: check the folder
-  before retrying. Favorite updates check per-property DAV results.
-- Optional Storage → Umbrel Photos selection mounts photo originals read-only
-  for the umbrel Drive account. Use Home/Photos for official mobile backups;
-  manage backup and deletion in Umbrel Photos. Other accounts require an explicit
-  Drive share. This neither replaces nor broadens the existing Files connection.
-- Official Umbrel Android app uses Apps → Umbrel Drive with a separate Drive
-  login. A fork is unnecessary for this supported launch path. Offline files and
-  Drive auto-upload use the separate native Drive client, version 1.1.0.
+- **Your Umbrel** shows account storage, Files/Photos connection state and setup
+  links. Connected-folder banners explain where files live and how recovery works.
+- **Copy to Umbrel Files** creates a copy in the connected writable folder without
+  moving the source or replacing an existing destination.
+- Android 1.2.0 and Linux 1.1.0 add local/Tailscale connection profiles. Android can
+  open the Tailscale app; Linux can read its CLI connection state. Profiles apply
+  to new sign-ins; existing sync accounts retain their address and credentials.
+- The original umbrel Drive account can register an exact Tailscale IP or `.ts.net`
+  address from Your Umbrel. Other accounts cannot see or change it. No wildcard
+  trust, Tailscale keys, account auto-migration or VPN policy changes are introduced.
+- HTTP is available on port 8391 and requires an explicit native-client setting.
+  HTTPS remains the default on 8390, with certificate verification retained. The
+  upload-only Linux backup helper supports explicit configure --allow-http. Use
+  HTTP only over a trusted connection such as Tailscale. No public access service
+  or router forwarding is configured.
 
-Android 1.1.0 also corrects the login logo and splash layout, retains the existing
-package/signing identity, and reports its own version. Linux remains 1.0.0.
-
-The 1.1.3 browser speed report remains a historical baseline. This candidate
-measured a 130 ms median server response for a 1,004-file folder using a cookie
-session; it is not a new browser-rendering benchmark.
-See TESTING.md and docs/umbrel-drive-release-readiness.md for this candidate's
-results, limitations, and remaining stable-release gates. Accounts, device app
-passwords, selected folders and private storage are preserved; no data migration
-or uninstall is required. Back up app data and connected folders separately.
+The chunked uploader, connected Photos support and mobile navigation from rc.1
+remain included. See TESTING.md and the release-readiness report for measured
+checks and remaining visual/device gates. This is not an official Umbrel product
+or a claim of complete Google/Synology feature parity.

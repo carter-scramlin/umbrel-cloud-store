@@ -1,3 +1,32 @@
+# 1.2.0-rc.2 verification
+
+- Five integration groups pass for owner/member isolation, cookie/CSRF protected
+  remote settings, exact Tailscale host registration/replacement/clear (including
+  IPv4, IPv6 and scheme normalization), and copy-to-Files preserving source/conflicts.
+- A registered host and authenticated owner session survive an ordinary app restart.
+- Nine JavaScript checks pass: uploader fault handling plus library boundaries,
+  read-only copy restrictions, unknown quota handling and HTTP-compatible random IDs.
+- HTTP cookie sign-in/upload, CSP/nonces, no-store account HTML and the one-script/
+  one-style budget pass. Decoded JS/CSS totals **45,178 bytes**, with **13,537 Brotli
+  bytes**. DAV folder metadata remains unchanged; no new browser timing is claimed.
+- Linux 1.1.0 builds and its Qt profile/dialog/status tests pass. The settings dialog
+  was rendered and inspected; the AppImage starts with xcb on Fedora 44 using isolated
+  XDG configuration. Its engine version stays 35.0.3 (build 2).
+- Eight Android address/login-transport tests pass, covering explicit HTTP browser
+  selection and no HTTPS downgrade. Release build/lint/Detekt/Spotless and same-key
+  signature/16 KB alignment checks pass. SpotBugs remains a partial upstream scan
+  because analysis dependencies are missing; see release readiness.
+- Six backup-helper tests pass, including explicit HTTP authentication, no-overwrite
+  headers, symlink/exclusion safety and refusal of every redirect.
+- Source packaging and fresh pinned-source application of both overlays pass.
+- Official Umbrel linter commit 3a087384be96ea6890a7428f62e28a2203c1ea6e:
+  zero errors, four existing image-digest/hardening warnings. Runtime digests remain
+  pinned to the tested images.
+
+The local browser retry remains blocked by a saved site-permission setting. No
+alternate surface bypass is used. Android settings UI and WAN/native upload/offline
+QA remain unverified for this client update. Earlier verification is scoped below.
+
 # 1.2 release candidate verification
 
 The current candidate's complete results and remaining stable-release gates are

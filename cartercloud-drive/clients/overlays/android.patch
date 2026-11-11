@@ -1,0 +1,278 @@
+--- a/app/src/main/res/values/strings.xml
++++ b/app/src/main/res/values/strings.xml
+@@ -1638,4 +1638,18 @@
+     <string name="player_control_view_play_pause_button_content_description">Play/Pause button</string>
+     <string name="player_control_view_next_button_content_description">Next button</string>
+     <string name="player_control_view_random_button_content_description">Random button</string>
++    <string name="umbrel_remote_title">Remote access</string>
++    <string name="umbrel_remote_description">Connect this device and your Umbrel to the same Tailscale network. Enter your Umbrel’s full MagicDNS name or Tailscale IP and the Drive port. Tailscale must be connected on both devices.</string>
++    <string name="umbrel_remote_local">Local address</string>
++    <string name="umbrel_remote_tailnet">Tailscale address</string>
++    <string name="umbrel_remote_local_mode">Use local address for new sign-ins</string>
++    <string name="umbrel_remote_tailnet_mode">Use Tailscale address for new sign-ins</string>
++    <string name="umbrel_remote_http">Allow HTTP addresses</string>
++    <string name="umbrel_remote_http_note">HTTP has no TLS encryption. Use it only over a trusted connection, such as Tailscale. HTTPS stays the default and certificate verification stays enabled.</string>
++    <string name="umbrel_remote_scope">Saved addresses apply to new sign-ins. Existing sync accounts keep their address. To use Tailscale for sync at home and away, sign in with the Tailscale address; never configure two accounts to sync the same local folder.</string>
++    <string name="umbrel_remote_open">Open or install Tailscale</string>
++    <string name="umbrel_remote_save">Save connection settings</string>
++    <string name="umbrel_remote_invalid">Enter an HTTP or HTTPS address with a valid host and port, without passwords, query strings or fragments. Enable HTTP explicitly to use it.</string>
++    <string name="umbrel_remote_no_browser">No app can open this link. Install Tailscale from Google Play.</string>
++    <string name="umbrel_remote_http_required">HTTP is disabled. Open Remote access and enable Allow HTTP addresses to use this connection.</string>
+ </resources>
+--- a/app/src/main/AndroidManifest.xml
++++ b/app/src/main/AndroidManifest.xml
+@@ -67,6 +67,7 @@
+         android:required="false" />
+ 
+     <queries>
++        <package android:name="com.tailscale.ipn" />
+         <package android:name="it.niedermann.nextcloud.deck" />
+         <package android:name="it.niedermann.nextcloud.deck.play" />
+         <package android:name="it.niedermann.nextcloud.deck.dev" />
+@@ -695,6 +696,7 @@
+         <activity
+             android:name=".ui.navigation.NavigatorActivity"
+             android:exported="false" />
++            <activity android:name=".umbreldrive.RemoteAccessActivity" android:exported="false" android:theme="@style/Theme.ownCloud.Toolbar" />
+     </application>
+ 
+ </manifest>
+--- a/app/src/main/res/xml/preferences.xml
++++ b/app/src/main/res/xml/preferences.xml
+@@ -13,6 +13,7 @@
+     <PreferenceCategory
+         android:title="@string/prefs_category_general"
+         android:key="general">
++        <Preference android:key="umbrel_remote_access" android:title="@string/umbrel_remote_title" android:summary="@string/umbrel_remote_tailnet" />
+         <Preference
+             android:title="@string/prefs_data_storage_location"
+             android:key="data_storage_location"
+--- a/app/src/main/java/com/owncloud/android/ui/activity/SettingsActivity.java
++++ b/app/src/main/java/com/owncloud/android/ui/activity/SettingsActivity.java
+@@ -179,6 +179,10 @@
+ 
+         // General
+         setupGeneralCategory();
++        findPreference("umbrel_remote_access").setOnPreferenceClickListener(preference -> {
++            startActivity(new Intent(this, com.owncloud.android.umbreldrive.RemoteAccessActivity.class));
++            return true;
++        });
+ 
+         // Synced folders
+         setupAutoUploadCategory(preferenceScreen);
+--- a/app/src/main/res/layout/account_setup.xml
++++ b/app/src/main/res/layout/account_setup.xml
+@@ -133,6 +133,9 @@
+                 android:textColor="@color/login_text_color"
+                 app:drawableStartCompat="@android:drawable/stat_notify_sync" />
+ 
++            <Button android:id="@+id/umbrel_remote_access" android:layout_width="match_parent"
++                android:layout_height="wrap_content" android:text="@string/umbrel_remote_title"
++                android:theme="@style/Button.Login" />
+             <ImageButton
+                 android:id="@+id/scan_qr"
+                 android:layout_width="wrap_content"
+--- a/app/src/main/res/layout-land/account_setup.xml
++++ b/app/src/main/res/layout-land/account_setup.xml
+@@ -133,6 +133,9 @@
+                 android:textColor="@color/login_text_color"
+                 app:drawableStartCompat="@android:drawable/stat_notify_sync" />
+ 
++            <Button android:id="@+id/umbrel_remote_access" android:layout_width="match_parent"
++                android:layout_height="wrap_content" android:text="@string/umbrel_remote_title"
++                android:theme="@style/Button.Login" />
+             <ImageButton
+                 android:id="@+id/scan_qr"
+                 android:layout_width="wrap_content"
+--- a/app/src/main/java/com/owncloud/android/authentication/AuthenticatorActivity.java
++++ b/app/src/main/java/com/owncloud/android/authentication/AuthenticatorActivity.java
+@@ -127,7 +127,6 @@
+ import androidx.annotation.VisibleForTesting;
+ import androidx.appcompat.app.ActionBar;
+ import androidx.browser.auth.AuthTabIntent;
+-import androidx.core.content.ContextCompat;
+ import androidx.core.graphics.Insets;
+ import androidx.core.view.ViewCompat;
+ import androidx.core.view.WindowInsetsCompat;
+@@ -343,6 +342,10 @@
+             }
+             
+             initServerPreFragment(savedInstanceState);
++            if (savedInstanceState == null && canChooseConnectionProfile()) {
++                accountSetupBinding.hostUrlInput.setText(
++                    com.owncloud.android.umbreldrive.RemoteAccessPreferences.selectedAddress(this));
++            }
+         }
+ 
+         ProcessLifecycleOwner.get().getLifecycle().addObserver(lifecycleEventObserver);
+@@ -446,6 +449,15 @@
+         });
+     }
+ 
++    private void rejectLoginTransport() {
++        runOnUiThread(() -> {
++            ProcessLifecycleOwner.get().getLifecycle().removeObserver(lifecycleEventObserver);
++            loginFlowExecutorService.shutdown();
++            android.widget.Toast.makeText(this, R.string.invalid_url, android.widget.Toast.LENGTH_LONG).show();
++            finish();
++        });
++    }
++
+     private String extractLoginUrl(String response) {
+         try {
+             authObject = gson.fromJson(response, AuthObject.class);
+@@ -489,20 +501,26 @@
+ 
+     private void launchDefaultWebBrowser(String url) {
+         if (url == null || url.isBlank()) {
+-            DisplayUtils.showSnackMessage(this, R.string.invalid_url);
++            rejectLoginTransport();
+             return;
+         }
+ 
++        if (!com.owncloud.android.umbreldrive.LoginBrowserPolicy.isAllowedForServer(url, baseUrl,
++            com.owncloud.android.umbreldrive.RemoteAccessPreferences.allowsHttp(this))) {
++            rejectLoginTransport();
++            return;
++        }
+         Uri uri = Uri.parse(url);
+         String loginScheme = getString(R.string.login_data_own_scheme);
+ 
+-        try {
+-            int toolbarColor = ContextCompat.getColor(this, R.color.primary);
+-            AuthTabIntent authTabIntent = new AuthTabIntent.Builder().setColorScheme(toolbarColor).build();
+-            authTabIntent.launch(authTabResultLauncher, uri, loginScheme);
+-            return;
+-        } catch (Exception e) {
+-            Log_OC.e(TAG, "Auth Tab login URL launch failed: " + e);
++        if (com.owncloud.android.umbreldrive.LoginBrowserPolicy.usesAuthTab(url)) {
++            try {
++                AuthTabIntent authTabIntent = new AuthTabIntent.Builder().build();
++                authTabIntent.launch(authTabResultLauncher, uri, loginScheme);
++                return;
++            } catch (Exception e) {
++                Log_OC.e(TAG, "Auth Tab login URL launch failed: " + e);
++            }
+         }
+ 
+         try {
+@@ -543,6 +561,12 @@
+     private void performLoginFlowV2() {
+         final var pollUrlAndToken = extractPollUrlAndToken();
+ 
++        if (!com.owncloud.android.umbreldrive.LoginBrowserPolicy.isAllowedForServer(
++            pollUrlAndToken.first, baseUrl,
++            com.owncloud.android.umbreldrive.RemoteAccessPreferences.allowsHttp(this))) {
++            rejectLoginTransport();
++            return;
++        }
+         RequestBody requestBody = new FormBody.Builder()
+             .add("token", pollUrlAndToken.second)
+             .build();
+@@ -553,7 +577,6 @@
+         String response = post.getResponseBodyAsString();
+ 
+         Log_OC.d(TAG, "performLoginFlowV2 status: " + status);
+-        Log_OC.d(TAG, "performLoginFlowV2 response: " + response);
+ 
+         if (!response.isEmpty()) {
+             runOnUiThread(() -> completeLoginFlow(response, status));
+@@ -561,13 +584,22 @@
+     }
+ 
+     private void completeLoginFlow(String response, int status) {
++        if (status != com.nextcloud.model.HTTPStatusCodes.SUCCESS.getCode()) {
++            return;
++        }
+         try {
+             LoginUrlInfo loginUrlInfo = gson.fromJson(response, LoginUrlInfo.class);
+-            if (loginUrlInfo == null) {
+-                Log_OC.e(TAG, "cannot complete login flow loginUrl is null");
++            if (loginUrlInfo == null || !loginUrlInfo.isValid(status)) {
++                rejectLoginTransport();
+                 return;
+             }
+-            isLoginProcessCompleted = loginUrlInfo.isValid(status);
++            isLoginProcessCompleted = true;
++            if (!com.owncloud.android.umbreldrive.LoginBrowserPolicy.isAllowedForServer(
++                loginUrlInfo.getServer(), baseUrl,
++                com.owncloud.android.umbreldrive.RemoteAccessPreferences.allowsHttp(this))) {
++                rejectLoginTransport();
++                return;
++            }
+ 
+             if (accountSetupBinding != null) {
+                 accountSetupBinding.hostUrlInput.setText("");
+@@ -578,9 +610,8 @@
+             webViewPassword = loginUrlInfo.getAppPassword();
+         } catch (Exception e) {
+             Log_OC.d(TAG, "Error completeLoginFlow: " + e);
+-            mServerStatusIcon = R.drawable.ic_alert;
+-            mServerStatusText = getString(R.string.qr_could_not_be_read);
+-            showServerStatus();
++            rejectLoginTransport();
++            return;
+         }
+ 
+         checkOcServer();
+@@ -706,10 +737,17 @@
+         return loginUrlInfo;
+     }
+ 
++    private boolean canChooseConnectionProfile() {
++        return mAccount == null && TextUtils.isEmpty(getString(R.string.enforce_servers));
++    }
++
+     /**
+      * Configures elements in the user interface under direct control of the Activity.
+      */
+     private void initOverallUi() {
++        accountSetupBinding.umbrelRemoteAccess.setVisibility(canChooseConnectionProfile() ? View.VISIBLE : View.GONE);
++        accountSetupBinding.umbrelRemoteAccess.setOnClickListener(v -> umbrelRemoteLauncher.launch(
++            new Intent(this, com.owncloud.android.umbreldrive.RemoteAccessActivity.class)));
+         accountSetupBinding.hostUrlContainer.setEndIconOnClickListener(v -> checkOcServer());
+ 
+         accountSetupBinding.hostUrlInputHelperText.setText(
+@@ -965,6 +1003,25 @@
+             uri = mServerInfo.mBaseUrl;
+         }
+ 
++        if (uri.toLowerCase(java.util.Locale.ROOT).startsWith(HTTP_PROTOCOL) &&
++            !com.owncloud.android.umbreldrive.RemoteAccessPreferences.allowsHttp(this)) {
++            mServerStatusText = getString(R.string.umbrel_remote_http_required);
++            mServerStatusIcon = R.drawable.ic_alert;
++            showServerStatus();
++            return;
++        }
++        if (!uri.isEmpty()) {
++            try {
++                uri = com.owncloud.android.umbreldrive.RemoteAccessAddress.normalize(
++                    AuthenticatorUrlUtils.INSTANCE.stripIndexPhpOrAppsFiles(uri),
++                    com.owncloud.android.umbreldrive.RemoteAccessPreferences.allowsHttp(this));
++            } catch (IllegalArgumentException ex) {
++                mServerStatusText = getString(R.string.umbrel_remote_invalid);
++                mServerStatusIcon = R.drawable.ic_alert;
++                showServerStatus();
++                return;
++            }
++        }
+         mServerInfo = new GetServerInfoOperation.ServerInfo();
+ 
+         if (!uri.isEmpty()) {
+@@ -1562,6 +1619,16 @@
+         qrScanResultLauncher.launch(intent);
+     }
+ 
++    private final ActivityResultLauncher<Intent> umbrelRemoteLauncher = registerForActivityResult(
++        new ActivityResultContracts.StartActivityForResult(), result -> {
++            Intent data = result.getData();
++            if (result.getResultCode() == Activity.RESULT_OK && data != null &&
++                accountSetupBinding != null && canChooseConnectionProfile()) {
++                accountSetupBinding.hostUrlInput.setText(data.getStringExtra(
++                    com.owncloud.android.umbreldrive.RemoteAccessPreferences.ADDRESS_EXTRA));
++            }
++        });
++
+     private final ActivityResultLauncher<Intent> authTabResultLauncher = AuthTabIntent.registerActivityResultLauncher(
+         this,
+         result -> Log_OC.d(TAG, "Auth Tab result code: " + result.resultCode)

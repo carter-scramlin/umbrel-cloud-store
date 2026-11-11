@@ -37,7 +37,27 @@
    if(!assembled)try{await client.request(session,{method:'DELETE',timeoutMs:15000});}catch{/* Server expires abandoned sessions after 24 hours. */}
   }
  }
- if(typeof module!=='undefined'&&module.exports){module.exports={sendFile};return;}
+ function uploadId(cryptoApi=crypto) {
+  if(typeof cryptoApi.randomUUID==='function')return cryptoApi.randomUUID();
+  const bytes=cryptoApi.getRandomValues(new Uint8Array(16));bytes[6]=(bytes[6]&15)|64;bytes[8]=(bytes[8]&63)|128;
+  const hex=Array.from(bytes,n=>n.toString(16).padStart(2,'0')).join('');
+  return [hex.slice(0,8),hex.slice(8,12),hex.slice(12,16),hex.slice(16,20),hex.slice(20)].join('-');
+ }
+ function libraryContext(path, connections) {
+  if(!connections.owner)return null;
+  if(['connected','read-only'].includes(connections.libraries.files)&&(path==='/Umbrel Files'||path.startsWith('/Umbrel Files/')))return {name:'Umbrel Files',description:'These are the same files you see in Umbrel Files. Changes in either app affect this folder. Use Files for recovery of changes made there.'};
+  if(connections.libraries.photos==='read-only'&&(path==='/Umbrel Photos'||path.startsWith('/Umbrel Photos/')))return {name:'Umbrel Photos · read-only',description:'Originals from your connected photo library. Browse and download here; manage photo backup and deletion in Umbrel Photos.'};
+  return null;
+ }
+ function umbrelCopyTarget(entry, connections) {
+  if(!connections.owner||connections.libraries.files!=='connected'||entry.path==='/Umbrel Photos'||entry.path==='/Umbrel Files'||entry.path.startsWith('/Umbrel Files/'))return null;
+  return '/Umbrel Files/'+entry.name;
+ }
+ function quotaSummary(used, available) {
+  const valid=value=>typeof value==='string'&&/^\d+$/.test(value)&&Number.isSafeInteger(Number(value));
+  return {used:valid(used)?Number(used):null,available:valid(available)?Number(available):null};
+ }
+ if(typeof module!=='undefined'&&module.exports){module.exports={sendFile,libraryContext,umbrelCopyTarget,quotaSummary,uploadId};return;}
  const $ = id => document.getElementById(id);
  const config = document.body.dataset;
  const csrf = document.head.dataset.requesttoken;
@@ -45,6 +65,7 @@
  const collator = new Intl.Collator(undefined, {numeric:true, sensitivity:'base'});
  const state = {dir:'/', entries:[], limit:200, request:0, controller:null, first:null};
  let transfer = null;
+ let connections = {owner:false,libraries:{}};
  const metrics = {fresh:[], initial:0};
  const xmlProps = '<d:getlastmodified/><d:getcontentlength/><d:getcontenttype/><d:resourcetype/><d:getetag/><oc:fileid/><oc:favorite/><oc:permissions/>';
  const xml = '<d:propfind xmlns:d="DAV:" xmlns:oc="http://owncloud.org/ns"><d:prop>'+xmlProps+'</d:prop></d:propfind>';
@@ -80,6 +101,7 @@
    throw Error(timeout.signal.aborted?'Connection interrupted. The request timed out. Try again.':'Connection interrupted. Check your network and try again.');
   } finally {clearTimeout(deadline);options.signal?.removeEventListener('abort',canceled);}
   if(!response.ok) {
+   if(response.status===400&&target.href===new URL(config.remoteSettings,location.href).href){const problem=await response.json();throw Error(problem.error||'Choose a valid Tailscale address.');}
    if(response.status===401)throw Error('Your session ended. Reload this page to sign in.');
    if(response.status===403)throw Error('You do not have permission for this action.');
    if([409,412].includes(response.status))throw Error('That name already exists or the file changed. Refresh and try again.');
@@ -118,6 +140,59 @@
   node.dataset.readyMs=String(metrics.initial);node.dataset.listingMs=String(metrics.fresh.at(-1));node.dataset.samples=JSON.stringify(metrics.fresh);node.dataset.entryCount=String(state.entries.length);
   node.textContent='First folder rows ready: '+metrics.initial+' ms\nLatest folder request + layout: '+metrics.fresh.at(-1)+' ms\nEntries: '+state.entries.length+' · visible rows: '+Math.min(state.limit,state.entries.length)+'\nRecent fresh loads (ms): '+metrics.fresh.join(', ');
  }
+ function renderLibraryContext() {
+  const context=libraryContext(state.dir,connections);
+  $('library-context').hidden=!context;
+  if(context){$('library-name').textContent=context.name;$('library-description').textContent=context.description;}
+ }
+ async function refreshConnections() {
+  const response=await request(config.connections,{timeoutMs:15000});
+  connections=await response.json();
+  document.querySelectorAll('[data-library]').forEach(link=>{
+   const key=link.dataset.library;const connected=['connected','read-only'].includes(connections.libraries[key]);const name=key==='files'?'Umbrel Files':'Umbrel Photos';
+   link.querySelector('span').textContent=connected?name:'Connect '+name;
+   link.href=connected?'?dir='+encodeURIComponent('/'+name):config.setup;
+   if(connected)link.dataset.dir='/'+name;else delete link.dataset.dir;
+  });
+  breadcrumbs();return connections;
+ }
+ async function yourUmbrel() {
+  const d=dialog('Your Umbrel','Your storage and devices, together at home.');const generation=state.dialog;
+  const content=el('div',undefined,'umbrel-cards');d.append(content);
+  const storage=el('section',undefined,'umbrel-card');storage.append(el('h3','Drive storage'));const usage=el('p','Checking storage…');storage.append(usage);content.append(storage);
+  const libraries=el('div',undefined,'umbrel-libraries');libraries.append(el('p','Checking folder connections…'));content.append(libraries);
+  function link(parent,text,href){const a=el('a',text,'umbrel-link');a.href=href;parent.append(a);}
+  const devices=el('section',undefined,'umbrel-card');devices.append(el('h3','Your devices'));link(devices,'Set up Linux, Android & remote access',config.setup);link(devices,'Manage device access',config.security);content.append(devices);
+  const done=el('button','Done','secondary');done.onclick=closeDialog;d.append(done);
+  const active=()=>d.open&&state.dialog===generation;
+  const quota=request(dav('/',true),{method:'PROPFIND',timeoutMs:15000,headers:{Depth:'0','Content-Type':'application/xml'},body:'<d:propfind xmlns:d="DAV:"><d:prop><d:quota-used-bytes/><d:quota-available-bytes/></d:prop></d:propfind>'}).then(r=>r.text()).then(text=>{
+   if(!active())return;
+   const doc=new DOMParser().parseFromString(text,'application/xml');const q=quotaSummary(prop(doc,'DAV:','quota-used-bytes'),prop(doc,'DAV:','quota-available-bytes'));
+   usage.textContent=(q.used===null?'Usage unavailable':size(q.used)+' used')+(q.available===null?' · Available space not reported':' · '+size(q.available)+' available');
+   if(q.used!==null&&q.available!==null&&q.used+q.available>0){const meter=el('meter');meter.min=0;meter.max=q.used+q.available;meter.value=q.used;meter.setAttribute('aria-label','Drive storage used');storage.append(meter);}
+   storage.append(el('p','Reported for this Drive account. Connected folders may have separate capacity and need their own backups.','card-note'));
+  }).catch(()=>{if(active())usage.textContent='Storage is unavailable. Your files are unchanged. Try reopening this panel.';});
+  const mounts=refreshConnections().then(data=>{
+   if(!active())return;libraries.replaceChildren();
+   if(!data.owner)return;
+   for(const [key,name] of [['files','Umbrel Files'],['photos','Umbrel Photos']]) {
+    const value=data.libraries[key];const connected=['connected','read-only'].includes(value);const card=el('section',undefined,'umbrel-card');card.append(el('h3',name));
+    const labels={'connected':'Connected · read and write','read-only':'Connected · read-only','name-conflict':'Needs attention · folder name already in use','owner-missing':'Needs attention · original account missing','disconnected':'Not connected'};
+    card.append(el('p',labels[value]||'Connection unavailable','connection-state'));
+    card.append(el('p',key==='files'?'One folder shared with Umbrel Files. Changes made there are indexed automatically.':'Optional originals from official Umbrel photo backups. Manage deletion in Umbrel Photos.','card-note'));
+    if(connected){const browse=el('button','Browse in Drive','secondary');browse.onclick=()=>{closeDialog();load('/'+name);};card.append(browse);}
+    link(card,connected?'Manage connection in Umbrel':'Choose a folder in Umbrel',config.osSettings);
+    if(key==='files')link(card,'Open Umbrel Files',config.osFiles);
+    libraries.append(card);
+   }
+   const remote=el('section',undefined,'umbrel-card');remote.append(el('h3','Remote access'));
+   const label=el('label','Your Umbrel’s Tailscale address');const address=el('input');address.type='url';address.value=data.remoteAddress||'';address.placeholder='https://umbrel.tail123.ts.net:8390';label.append(address);remote.append(label);
+   remote.append(el('p','Connect Tailscale on your Umbrel and clients first. Save the full .ts.net name or Tailscale IP with port 8390 for HTTPS, or 8391 for HTTP. Then enter this address in each client’s Remote access settings. Saving it allows this host on Drive; it does not install or authenticate Tailscale. Clear the field and save to remove the address.','card-note'));
+   const save=el('button','Save remote address','secondary');const feedback=el('p');feedback.setAttribute('role','status');save.onclick=async()=>{save.disabled=true;feedback.textContent='Saving…';try{const response=await request(config.remoteSettings,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({address:address.value})});const saved=await response.json();address.value=saved.address;feedback.textContent='Saved. Use this address for new client sign-ins. Existing sync accounts keep their address.';}catch(e){feedback.textContent=e.message;}finally{save.disabled=false;}};remote.append(save,feedback);libraries.append(remote);
+   libraries.append(el('p','Connections reflect the background indexer’s last report. After choosing a folder in Umbrel, allow about a minute and reopen this panel.','card-note'));
+  }).catch(()=>{if(active())libraries.replaceChildren(el('p','Folder connection status is unavailable. Try reopening this panel.'));});
+  await Promise.allSettled([quota,mounts]);
+ }
  function breadcrumbs() {
   const node=$('breadcrumbs');node.replaceChildren();let path='';
   const parts=[['My files','/'],...state.dir.split('/').filter(Boolean).map(name=>{path+='/'+name;return[name,path];})];
@@ -125,7 +200,7 @@
    if(i)node.append(el('span','/'));
    const a=el('a',name);a.href='?dir='+encodeURIComponent(dir);a.addEventListener('click',e=>{e.preventDefault();load(dir);});node.append(a);
   }
-  $('full-workspace').href=workspace();
+  $('full-workspace').href=workspace();renderLibraryContext();
   document.querySelectorAll('.nav-item[data-dir]').forEach(n=>n.classList.toggle('active',n.dataset.dir==='/'?state.dir==='/':state.dir===n.dataset.dir||state.dir.startsWith(n.dataset.dir+'/')));
  }
  function render() {
@@ -144,7 +219,7 @@
   $('new-folder').disabled=!state.canCreate;$('upload').disabled=Boolean(transfer)||!state.canCreate;
   $('new-folder').title=$('upload').title=state.canCreate?'':'This folder is read-only.';
   $('rows').replaceChildren(fragment);$('empty').hidden=items.length!==0;$('empty').querySelector('h2').textContent=filter?'No matching files.':'Room for something new.';
-  $('empty').querySelector('p').textContent=filter?'Try another name in this folder.':'Drop files here, upload, or create a folder.';
+  $('empty').querySelector('p').textContent=filter?'Try another name in this folder.':state.canCreate?'Drop files here, upload, or create a folder.':'This folder is read-only. Files added at the source appear here after indexing.';
   $('count').textContent=items.length+(items.length===1?' item':' items')+(items.length>state.limit?' · showing '+state.limit:'')+(filter?' in this folder':'');
   $('more').hidden=items.length<=state.limit;
  }
@@ -154,7 +229,7 @@
   try {
    dir=normal(dir);if(push||dir!==state.dir){state.limit=200;$('search').value='';}state.dir=dir;error('');state.loading=true;
    $('folder-title').textContent=dir==='/'?'My files':dir.split('/').at(-1);document.title=$('folder-title').textContent+' · Umbrel Drive';breadcrumbs();
-   if(push){const u=new URL(location.href);u.searchParams.set('dir',dir);history.pushState({},'',u);}
+   if(push){const u=new URL(location.href);u.searchParams.set('dir',dir);u.searchParams.delete('panel');history.pushState({},'',u);}
    if(!quiet){$('rows').replaceChildren();$('empty').hidden=true;$('loading').hidden=false;}$('file-list').setAttribute('aria-busy','true');
    const response=await request(dav(dir,true),{method:'PROPFIND',headers:{Depth:'1','Content-Type':'application/xml; charset=utf-8'},body:xml,signal:state.controller.signal});
    const text=await response.text();if(id!==state.request)return;
@@ -186,6 +261,12 @@
   const open=el('a',entry.folder?'Open folder':'Open in full workspace');open.href=entry.folder?'?dir='+encodeURIComponent(entry.path):workspace(entry);if(entry.folder)open.onclick=e=>{e.preventDefault();closeDialog();load(entry.path);};list.append(open);
   if(!entry.folder){const download=el('a','Download');download.href=dav(entry.path);download.download=entry.name;list.append(download);}
   if(entry.permissions.includes('R'))button('Share link',()=>share(entry).catch(e=>error(e.message)));
+  const copyTarget=umbrelCopyTarget(entry,connections);
+  if(copyTarget)button('Copy to Umbrel Files',()=>ask('Copy to Umbrel Files?',[],async()=>{
+   await request(dav(entry.path),{method:'COPY',headers:{Destination:dav(copyTarget),Overwrite:'F',...(entry.etag?{'If-Match':entry.etag}:{})}});
+   status('Copied to Umbrel Files. The original stays in Drive.');
+  },'Copy','A copy of “'+entry.name+'” will appear in your connected Umbrel Files folder. Existing names are never replaced. The original stays here.'));
+
   button(entry.favorite?'Remove favorite':'Add favorite',async()=>{try{const result=await request(dav(entry.path),{method:'PROPPATCH',headers:{'Content-Type':'application/xml'},body:'<d:propertyupdate xmlns:d="DAV:" xmlns:oc="http://owncloud.org/ns"><d:set><d:prop><oc:favorite>'+(entry.favorite?'0':'1')+'</oc:favorite></d:prop></d:set></d:propertyupdate>'});const resultXml=new DOMParser().parseFromString(await result.text(),'application/xml');if(resultXml.querySelector('parsererror')||!resultXml.getElementsByTagNameNS('DAV:','status').length||!Array.from(resultXml.getElementsByTagNameNS('DAV:','status')).every(n=>/\s200\s/.test(n.textContent)))throw Error('This storage could not update the favorite.');closeDialog();await load(state.dir,false);}catch(e){error(e.message);}});
   if(entry.permissions.includes('N'))button('Rename',()=>ask('Rename',[{name:'name',label:'Name',value:entry.name,required:true}],async v=>refreshAfter(async()=>{const parent=entry.path.slice(0,entry.path.lastIndexOf('/'))||'/';const target=child(parent,v.name);if(target===entry.path)return;await request(dav(entry.path),{method:'MOVE',headers:{Destination:dav(target),Overwrite:'F',...(entry.etag?{'If-Match':entry.etag}:{})}});}),'Rename'));
   for(const method of ['MOVE','COPY'].filter(method=>method==='COPY'||entry.permissions.includes('V')))button(method==='MOVE'?'Move to folder…':'Copy to folder…',()=>ask(method==='MOVE'?'Move to folder':'Copy to folder',[{name:'folder',label:'Destination folder',value:'/',required:true}],async v=>refreshAfter(async()=>{const target=child(normal(v.folder),entry.name);if(target===entry.path)throw Error('Choose a different folder.');await request(dav(entry.path),{method,headers:{Destination:dav(target),Overwrite:'F',...(entry.etag?{'If-Match':entry.etag}:{})}});}),method==='MOVE'?'Move':'Copy','Enter a folder path such as /Documents. Existing files are never replaced.'));
@@ -222,7 +303,7 @@
     $('transfer-title').textContent=file.name+' · '+(completed+1)+' of '+files.length;
     $('transfer-progress').value=0;$('transfer-detail').textContent='Uploading '+size(file.size)+'…';
     status('Uploading '+file.name+'…');
-    await sendFile(file,dav(child(dir,file.name)),transfer.signal,{request,uploadRoot:config.uploadRoot,uid:config.uid,uuid:()=>crypto.randomUUID(),progress:(value,message)=>{if(value!==null)$('transfer-progress').value=value;$('transfer-detail').textContent=message;}});completed++;
+    await sendFile(file,dav(child(dir,file.name)),transfer.signal,{request,uploadRoot:config.uploadRoot,uid:config.uid,uuid:()=>uploadId(),progress:(value,message)=>{if(value!==null)$('transfer-progress').value=value;$('transfer-detail').textContent=message;}});completed++;
    }
    status('Uploaded '+completed+(completed===1?' file.':' files.'));
   } catch(e){error(e.name==='AbortError'?'Upload canceled. Completed files are kept.':e.message+' Completed files are kept. Check this folder before retrying.');status(completed+' uploads completed.');}
@@ -235,17 +316,19 @@
    if(problem)error(problem);status(message);
   }
  }
+ $('your-umbrel').onclick=()=>{navigation.setAttribute('aria-expanded','false');$('drive-sidebar').classList.remove('expanded');yourUmbrel();};
  $('cancel-upload').onclick=()=>transfer?.abort();
  addEventListener('beforeunload',e=>{if(transfer){e.preventDefault();e.returnValue='';}});
  const navigation=$('navigation-toggle');
  navigation.onclick=()=>{const expanded=navigation.getAttribute('aria-expanded')!=='true';navigation.setAttribute('aria-expanded',String(expanded));$('drive-sidebar').classList.toggle('expanded',expanded);};
  $('drive-sidebar').addEventListener('click',e=>{if(e.target.closest('a')){navigation.setAttribute('aria-expanded','false');$('drive-sidebar').classList.remove('expanded');}});
- document.querySelectorAll('[data-dir]').forEach(n=>n.addEventListener('click',e=>{e.preventDefault();load(n.dataset.dir);}));
+ $('drive-sidebar').addEventListener('click',e=>{const link=e.target.closest('[data-dir]');if(link){e.preventDefault();load(link.dataset.dir);}});
  $('new-folder').onclick=()=>{const dir=state.dir;ask('New folder',[{name:'name',label:'Folder name',required:true}],async v=>{await request(dav(child(dir,v.name),true),{method:'MKCOL'});if(state.dir===dir)await load(dir,false);},'Create folder');};
  $('upload').onclick=()=>$('file-input').click();$('file-input').onchange=()=>upload(Array.from($('file-input').files));
  $('refresh').onclick=()=>load(state.dir,false);$('search').oninput=()=>{state.limit=200;render();};$('sort').onchange=render;$('more').onclick=()=>{state.limit+=200;render();};
  addEventListener('popstate',()=>load(new URL(location.href).searchParams.get('dir')||'/',false));
  setInterval(()=>{if(document.visibilityState==='visible'&&!state.loading&&!$('action-dialog').open&&!transfer&&!$('file-list').contains(document.activeElement)&&document.activeElement!==$('search'))load(state.dir,false,true);},30000);
  let dragging=0;document.addEventListener('dragenter',e=>{if(Array.from(e.dataTransfer.types).includes('Files')){e.preventDefault();dragging++;document.body.classList.add('drop-active');}});document.addEventListener('dragleave',()=>{if(--dragging<=0){dragging=0;document.body.classList.remove('drop-active');}});document.addEventListener('dragover',e=>{if(Array.from(e.dataTransfer.types).includes('Files'))e.preventDefault();});document.addEventListener('drop',e=>{e.preventDefault();dragging=0;document.body.classList.remove('drop-active');if(Array.from(e.dataTransfer.items).some(item=>item.webkitGetAsEntry?.()?.isDirectory)){error('For folder uploads, use the full workspace or the Linux client.');return;}upload(Array.from(e.dataTransfer.files));});
+ if(new URL(location.href).searchParams.get('panel')==='umbrel')yourUmbrel();else refreshConnections().catch(()=>{});
  load(new URL(location.href).searchParams.get('dir')||'/',false);
 })();

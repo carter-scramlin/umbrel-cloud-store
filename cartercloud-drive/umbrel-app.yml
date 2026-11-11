@@ -2,7 +2,7 @@ manifestVersion: 2.0
 id: cartercloud-drive
 name: Umbrel Drive
 category: files
-version: 1.2.0-rc.1
+version: 1.2.0-rc.2
 tagline: Your files. Right at home.
 description: "A community drive for your Umbrel, with a clean file browser and native Linux\
   \ and Android clients built on Nextcloud. Keep folders in sync, browse offline on Android,\
@@ -38,11 +38,7 @@ gallery:
 dependencies: []
 defaultUsername: umbrel
 deterministicPassword: true
-releaseNotes: 'Release candidate for the community release: complete mobile navigation, chunked
-  uploads with progress and cancellation, no-overwrite conflict protection, interrupted-chunk
-  retries, and an optional read-only Umbrel Photos connection for official mobile backups. Existing
-  accounts, Files connections, and clients are preserved. See TESTING.md for verified behavior
-  and outstanding release gates.'
+releaseNotes: 'Your Umbrel now shows storage and connected folders, with a safe Copy to Umbrel Files action. Native Android 1.2.0 and Linux 1.1.0 add Tailscale connection profiles and explicit HTTP support on port 8391. HTTPS remains the default on 8390. Remote profiles apply to new sign-ins; existing accounts retain their address. This remains a community release candidate pending final visual and device QA.'
 folderAccess:
 - id: umbrel-files
   name: Umbrel Files

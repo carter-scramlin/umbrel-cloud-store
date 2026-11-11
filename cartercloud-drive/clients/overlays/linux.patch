@@ -1,0 +1,135 @@
+--- a/src/gui/CMakeLists.txt
++++ b/src/gui/CMakeLists.txt
+@@ -127,6 +127,10 @@
+     logbrowser.h
+     logbrowser.cpp
+     networksettings.h
++    remoteaccessprofile.h
++    remoteaccessprofile.cpp
++    remoteaccessdialog.h
++    remoteaccessdialog.cpp
+     networksettings.cpp
+     ocsnavigationappsjob.h
+     ocsnavigationappsjob.cpp
+@@ -895,3 +899,5 @@
+ endif()
+ 
+ configure_file(configgui.h.in ${CMAKE_CURRENT_BINARY_DIR}/configgui.h)
++
++set_source_files_properties(remoteaccessdialog.cpp remoteaccessprofile.cpp PROPERTIES SKIP_UNITY_BUILD_INCLUSION ON)
+--- a/test/CMakeLists.txt
++++ b/test/CMakeLists.txt
+@@ -292,6 +292,7 @@
+     nextcloud_add_test(AccountSettings)
+ endif()
+ 
++nextcloud_add_test(RemoteAccess)
+ nextcloud_add_test(NetworkSettings)
+ nextcloud_add_test(UpdateChannel)
+ nextcloud_add_test(FileActionsModel)
+--- a/src/gui/networksettings.cpp
++++ b/src/gui/networksettings.cpp
+@@ -5,6 +5,8 @@
+  */
+ 
+ #include "networksettings.h"
++#include "remoteaccessdialog.h"
++#include <QPushButton>
+ #include "ui_networksettings.h"
+ 
+ #include "account.h"
+@@ -32,6 +34,12 @@
+     , _account(account)
+ {
+     _ui->setupUi(this);
++    auto *remoteAccess = new QPushButton(tr("Remote access · Tailscale & HTTP"), this);
++    _ui->gridLayout_3->addWidget(remoteAccess, _ui->gridLayout_3->rowCount(), 0);
++    connect(remoteAccess, &QPushButton::clicked, this, [this] {
++        RemoteAccessDialog dialog(this);
++        dialog.exec();
++    });
+     setAutoFillBackground(false);
+ 
+     _ui->manualSettings->setVisible(_ui->manualProxyRadioButton->isChecked());
+--- a/src/gui/wizard/accountwizardcontroller.h
++++ b/src/gui/wizard/accountwizardcontroller.h
+@@ -197,6 +197,7 @@
+ 
+     [[nodiscard]] static QString normalizeServerUrlInput(const QString &serverUrl, const QString &davPath = {});
+ 
++    Q_INVOKABLE void configureRemoteAccess();
+     Q_INVOKABLE void submitServerUrl();
+     Q_INVOKABLE void submitBasicAuth();
+     Q_INVOKABLE void openBrowserLogin();
+--- a/src/gui/wizard/accountwizardcontroller.cpp
++++ b/src/gui/wizard/accountwizardcontroller.cpp
+@@ -12,6 +12,8 @@
+ #include "common/vfs.h"
+ #include "config.h"
+ #include "configfile.h"
++#include "remoteaccessprofile.h"
++#include "remoteaccessdialog.h"
+ #include "creds/credentialsfactory.h"
+ #include "creds/httpcredentialsgui.h"
+ #include "creds/webflowcredentials.h"
+@@ -159,7 +161,9 @@
+         Theme::instance()->multipleOverrideServers() ? QString{} : Theme::instance()->overrideServerUrl();
+ 
+     _remoteFolder = Theme::instance()->defaultServerFolder();
+-    setServerUrl(defaultUrl);
++    QSettings remoteSettings;
++    const auto preferredAddress = RemoteAccessProfile::load(remoteSettings).selectedAddress();
++    setServerUrl(defaultUrl.isEmpty() ? preferredAddress : defaultUrl);
+     const auto hasForcedConcreteServerUrl =
+         Theme::instance()->forceOverrideServerUrl() && !defaultUrl.isEmpty() && !Theme::instance()->multipleOverrideServers();
+     setServerUrlEditable(!hasForcedConcreteServerUrl && !overrideServerSelectionRequired());
+@@ -726,6 +730,18 @@
+     return result;
+ }
+ 
++void AccountWizardController::configureRemoteAccess()
++{
++    if (_busy || !serverUrlEditable()) {
++        return;
++    }
++    RemoteAccessDialog dialog;
++    if (dialog.exec() == QDialog::Accepted) {
++        setServerUrl(dialog.selectedAddress());
++        setErrorText({});
++    }
++}
++
+ void AccountWizardController::submitServerUrl()
+ {
+     if (_busy) {
+@@ -744,6 +760,15 @@
+         return;
+     }
+ 
++    QSettings remoteSettings;
++    if (url.scheme() == QStringLiteral("http") && !RemoteAccessProfile::load(remoteSettings).allowHttp) {
++        setErrorText(tr("HTTP is disabled. Open Remote access and enable Allow HTTP addresses to use this connection."));
++        return;
++    }
++    if (RemoteAccessProfile::normalizedAddress(normalizedServerUrl, true).isEmpty()) {
++        setErrorText(tr("Use an HTTP or HTTPS address without passwords, query strings or fragments."));
++        return;
++    }
+     ensureAccount();
+     setPublicShareSetup(false);
+     setBasicAuthUser({});
+--- a/src/gui/wizard/qml/ServerPage.qml
++++ b/src/gui/wizard/qml/ServerPage.qml
+@@ -230,6 +230,12 @@
+             }
+         }
+ 
++        WizardButton {
++            text: qsTr("Remote access · Tailscale & HTTP")
++            enabled: !root.controller.busy && root.controller.serverUrlEditable
++            onClicked: root.controller.configureRemoteAccess()
++        }
++
+         Item {
+             Layout.fillHeight: true
+         }

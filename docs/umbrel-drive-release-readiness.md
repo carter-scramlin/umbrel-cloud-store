@@ -5,6 +5,55 @@ Google Drive parity or official Umbrel endorsement. Stable promotion is held unt
 the new browser UI has completed visual and interaction checks. Existing live
 1.1.3 data and clients have not been uninstalled or reset.
 
+## 1.2.0-rc.2 additions
+
+This candidate adds **Your Umbrel** for account storage, connected-folder status,
+native storage settings and exact remote-host registration. Status reflects the
+background indexer's last report. A disconnected or conflicting folder name is
+never labeled as a connected library. Folder banners explain shared Files and
+read-only Photos; Copy to Umbrel Files preserves the source and refuses conflicts.
+
+Android 1.2.0 and Linux 1.1.0 add saved local/Tailscale address profiles. They use
+an installed Tailscale app/service, and do not embed a VPN, collect Tailscale keys,
+join a tailnet or modify its access policy. Linux can read CLI connection state;
+Android can open/install the official Tailscale app. Profiles apply to new sign-ins;
+existing sync accounts retain their address and credentials. Use a Tailscale URL
+for sync at home and away; never point two accounts at the same local sync folder.
+
+The original umbrel account can register an exact Tailscale IPv4/IPv6 or .ts.net
+host. This is a CSRF-protected setting, hidden from other accounts, with no wildcard
+trust. Replacing or clearing removes only a host managed by this setting. It does
+not grant network access or prove that Tailscale is connected. HTTP is available on
+device port 8391; native clients require explicit HTTP selection. HTTPS remains
+8390 with certificate verification. HTTP has no TLS encryption and needs a trusted
+transport, such as Tailscale. No router forwarding or public Funnel is configured.
+
+New local checks pass: five owner/member/CSRF/remote-host/copy/HTTP-login API groups, a saved
+host/session restart rehearsal, nine JavaScript uploader/context/quota/HTTP-ID cases,
+HTTP cookie sign-in and upload, CSP/cache/encoding checks, and source packaging.
+Initial JS/CSS total 45,178 decoded bytes (33,879 JS + 11,299 CSS); combined
+Brotli is 13,537 bytes. Storage queries run on demand, outside folder loading.
+Linux profile/dialog/status Qt tests pass; the dialog was rendered and inspected,
+and the packaged AppImage starts with the xcb plugin on Fedora 44 using isolated
+configuration. Its visible engine version remains 35.0.3, build 2; package version
+is 1.1.0. Eight Android address/transport tests pass. Explicit HTTP uses the standard browser
+login flow because Chrome Auth Tab disallows HTTP. Login, poll and returned server
+URLs reject a downgrade from an HTTPS origin, even when another profile permits
+HTTP. Invalid transport closes the failed sign-in and stops its poller; the raw
+Login v2 poll-response debug log was removed. Android release assembly, lint (zero errors), Detekt and Spotless pass. APK signature
+v3, 16 KB alignment and same-key upgrade identity pass; version code is 350000292.
+APK SHA-256: `4d43f7bfa588070666b1ecd799a2b2070c7814f7a464da886d36e2f297c7ec0d`. The settings UI has not yet been checked on a device. Umbrel package lint at official tooling commit
+3a087384be96ea6890a7428f62e28a2203c1ea6e reports zero errors and four warnings
+(the existing Redis hardening option and rebuilt upstream Nextcloud/Redis tags).
+Tested image digests remain pinned.
+
+The browser retry on 2026-11-10 was rejected by the same saved site-permission block
+for 127.0.0.1:18394. No alternate surface is used to bypass it. New Android settings
+UI and end-to-end remote/native upload/offline device QA remain separate gates.
+Your production server remains 1.1.3; no production update or reset was performed.
+
+The verification history below describes rc.1 unless a new result is stated above.
+
 ## Decisions and shipped changes
 
 Use the official Umbrel Android app's existing Apps launcher instead of maintaining
@@ -74,14 +123,14 @@ keyboard focus within file rows and continues for read-only folders.
   rebuilt upstream tags for the still-pinned, tested Nextcloud/Redis digests.
   Pins are intentionally unchanged; floating tags are not substituted silently.
 
-## Remaining stable-release gates
+## Remaining stable-release gates for the current candidate
 
 1. Visual/interaction checks of the new 1.2 desktop and phone layouts, keyboard
    navigation, upload progress/cancel/conflict messages, read-only folders, login
    themes, and navigation back to Umbrel. The browser tool rejected localhost:18394
    first as declined and then as a saved site-permission block, even after the owner
    explicitly approved access. No alternate surface is used to bypass that block.
-2. Native Drive Android 1.1.0 upload/download/offline smoke tests. Build, lint,
+2. Native Drive Android 1.2.0 upload/download/offline smoke tests. Build, lint,
    signature and source packaging passed. Both the initial APK install and the
    same-key upgrade to 1.1.0 succeeded in the VM; local DNS was unavailable,
    so direct LAN IP was tested. Its certificate dialog matches the live Umbrel
@@ -91,8 +140,9 @@ keyboard focus within file rows and continues for read-only folders.
    and passes signature/alignment checks with the original key. The corrected splash
    and sign-in logo rendered after upgrade. Upload/offline and physical-phone
    background media behavior still require device QA.
-3. Green public CI for the exact candidate commit and matching release checksums
-   is now complete (publication verification below). Promote a fresh stable release
+3. Green public CI and published checksums must match the current candidate.
+   rc.1 publication verification is recorded below; rc.2 must complete its own
+   workflow before the store catalog advances. Promote a fresh stable release
    only after the remaining gates pass. Never rewrite immutable assets.
 
 Linux native binaries remain 1.0.0 and x86_64 only; ARM64 server support comes from
@@ -118,7 +168,7 @@ candidate asset and API measurements are recorded in TESTING.md after final chec
 [Nextcloud release schedule](https://github.com/nextcloud/server/wiki/Maintenance-and-Release-Schedule).
 
 
-## Publication verification
+## rc.1 publication verification
 
 Public CI [42743505981](https://github.com/carter-scramlin/umbrel-cloud-store/actions/runs/42743505981)
 passed for candidate commit `37a0d73b1d8bd709654ede1fdebaabe945e72bef`.
@@ -145,3 +195,34 @@ after installation. During this session the Waydroid guest briefly showed black
 screens and its boot animation; it recovered without a forced VM reset. No cause
 was established, and this is not evidence of a diagnosed app crash. Native account
 sign-in/upload/offline tests remain pending the owner's certificate decision.
+
+[Chrome Auth Tab protocol rules](https://developer.chrome.com/docs/android/custom-tabs/guide-auth-tab),
+[Tailscale MagicDNS](https://tailscale.com/docs/features/magicdns).
+
+
+## Static-analysis scope
+
+The upstream GenericDebug SpotBugs task ran and reported missing analysis classes
+(exit 3, tolerated by upstream ignoreFailures). Its partial report contains 352
+findings. No finding is reported for the new Java login policy or profile-result
+callback; the callback null-return issue discovered during this work was fixed.
+Six pre-existing AuthenticatorActivity findings match the earlier upstream-method
+baseline. This is not a clean whole-app SpotBugs scan or an independent audit.
+The eight focused URL/transport tests and the release lint/Detekt/Spotless checks
+passed. Android ignores pending Login v2 poll responses until a valid success;
+HTTP and HTTPS never share a partially completed account through profile selection.
+
+The upload-only backup helper accepts explicit --allow-http and rejects non-boolean
+configuration flags. Six backup safety tests pass, including a real localhost HTTP
+request with authentication and no-overwrite headers. Every redirect remains blocked.
+
+
+The signed Android APK and Linux AppImage were reconstructed from the public asset
+commit `ec41c4d413cf3e026bb7fc7f4c7ad6f706ed1de2` and their complete SHA-256 hashes
+matched the local checked packages. Linux 1.1.0 SHA-256:
+`ca7b87886b93e4faa4b1ab54f10817e21b837eca16259f999bb331ea82962b59`.
+The source build helper now captures the same Linux build-2 and pinned-source
+builder workarounds used for the checked AppImage. Native APK/code source overlays
+match the corresponding freshly branded trees. The exact candidate must pass the
+public release workflow on `umbrel-drive-rc2` before advancing the store's main
+branch; the immutable release will then already contain its downloads.

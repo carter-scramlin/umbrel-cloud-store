@@ -9,6 +9,10 @@ that every device and operating-system combination has been tested here.
 | Web file browser, folders, sorting, grid/list | Lightweight list browser by default; full Nextcloud workspace retains grid/list and advanced tools | Included; lightweight uploads ≤16 GiB, larger/resumable transfers in full workspace or clients |
 | Official mobile photo originals | Optional separate read-only folder slot, normally Home/Photos | Owner-only until explicitly shared; photo backup/deletion stay in Umbrel Photos |
 | Official Umbrel Android app | Open from Apps using its existing WebView; native Files reaches the selected folder | Official Play app paired in Android 13 VM; launch/login verification recorded in release readiness; physical-phone QA pending; separate Drive login |
+| Umbrel connection center | Account storage, Files/Photos status and direct native settings links | New in 1.2.0-rc.2; no OS admin token requested |
+| Copy to Umbrel Files | Context action copies into the selected writable folder | Keeps source and refuses overwrite conflicts |
+| Tailscale connection profiles | Built-in Android/Linux settings and exact host registration on the server | Uses installed Tailscale; new sign-ins only; no automatic account rerouting |
+| HTTP connections | Plain HTTP server port 8391; explicit client setting | HTTPS default remains 8390; HTTP needs a trusted transport |
 | Native Umbrel Files integration | Folder picker, same files, UID 1000, owner-only local storage mount, automatic indexing | Round-trip and isolation integration tested |
 | Name search, favorites, tags, recent files | Files and unified search | Included |
 | File previews, photos, PDF viewing | Viewer, Photos, PDF viewer | Included; codec/format limits apply |

@@ -6,6 +6,7 @@ import argparse
 import json
 from pathlib import Path
 import re
+import shutil
 import subprocess
 import xml.etree.ElementTree as ET
 from PIL import Image, ImageDraw
@@ -47,6 +48,21 @@ def cmake_value(text, key, value):
     return changed
 
 
+def apply_overlay(root, kind):
+    patch = HERE / 'overlays' / (kind + '.patch')
+    applied = subprocess.run(['git', '-C', str(root), 'apply', '--reverse', '--check', str(patch)],
+                             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode == 0
+    if not applied:
+        subprocess.run(['git', '-C', str(root), 'apply', '--check', str(patch)], check=True)
+        subprocess.run(['git', '-C', str(root), 'apply', str(patch)], check=True)
+    source = HERE / 'overlays' / kind
+    for path in source.rglob('*'):
+        if path.is_file():
+            target = root / path.relative_to(source)
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(path, target)
+
+
 def desktop(root):
     verify(root, 'linux')
     config = root / 'NEXTCLOUD.cmake'
@@ -62,7 +78,7 @@ def desktop(root):
         text = cmake_value(text, key, value)
     text = text.replace('option( WITH_PROVIDERS "Build with providers list" ON )',
                         'option( WITH_PROVIDERS "Build with providers list" OFF )')
-    config.write_text(text)
+    config.write_text(text.replace(' CACHE STRING "URL for updater"', ''))
     svg = (HERE.parent / 'server/umbreldrive/img/logo.svg').read_text()
     icons = root / 'theme/colored'
     for name in ['io.github.carterscramlin.umbreldrive', 'UmbrelDrive']:
@@ -73,6 +89,9 @@ def desktop(root):
     # This hint is not a fixed endpoint: users can connect to their own HTTPS host.
     theme = root / 'src/libsync/nextcloudtheme.cpp'
     theme.write_text(theme.read_text().replace('https://try.nextcloud.com', 'https://umbrel.local:8390'))
+    builder = root / 'admin/linux/build-appimage.sh'
+    builder.write_text(builder.read_text().replace('mkdir /app', 'mkdir -p /app').replace('mkdir build-client', 'mkdir -p build-client'))
+    apply_overlay(root, 'linux')
 
 
 def android(root):
@@ -149,6 +168,7 @@ def android(root):
     # Only the second text size changes; the title retains upstream typography.
     layout = layout.replace('android:textSize="@dimen/splash_text_size" />', 'android:textSize="16sp" />')
     splash.write_text(layout)
+    apply_overlay(root, 'android')
     (res / 'drawable/ic_launcher_background.xml').write_text('''<?xml version="1.0" encoding="utf-8"?>
 <!-- SPDX-FileCopyrightText: 2026 Carter Cloud -->
 <!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
