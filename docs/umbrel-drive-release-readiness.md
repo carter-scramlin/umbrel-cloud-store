@@ -42,15 +42,15 @@ URLs reject a downgrade from an HTTPS origin, even when another profile permits
 HTTP. Invalid transport closes the failed sign-in and stops its poller; the raw
 Login v2 poll-response debug log was removed. Android release assembly, lint (zero errors), Detekt and Spotless pass. APK signature
 v3, 16 KB alignment and same-key upgrade identity pass; version code is 350000292.
-APK SHA-256: `4d43f7bfa588070666b1ecd799a2b2070c7814f7a464da886d36e2f297c7ec0d`. The settings UI has not yet been checked on a device. Umbrel package lint at official tooling commit
+APK SHA-256: `4d43f7bfa588070666b1ecd799a2b2070c7814f7a464da886d36e2f297c7ec0d`. The settings UI was subsequently checked on Android 13; see the rc.2 publication verification below. Umbrel package lint at official tooling commit
 3a087384be96ea6890a7428f62e28a2203c1ea6e reports zero errors and four warnings
 (the existing Redis hardening option and rebuilt upstream Nextcloud/Redis tags).
 Tested image digests remain pinned.
 
 The browser retry on 2026-11-10 was rejected by the same saved site-permission block
-for 127.0.0.1:18394. No alternate surface is used to bypass it. New Android settings
-UI and end-to-end remote/native upload/offline device QA remain separate gates.
-Your production server remains 1.1.3; no production update or reset was performed.
+for 127.0.0.1:18394. No alternate surface is used to bypass it. End-to-end remote/native upload/offline device QA remains a separate gate.
+No production update or reset was performed. The Umbrel MCP app-details version
+can reflect its cached store catalog; it is not used as runtime-version proof.
 
 The verification history below describes rc.1 unless a new result is stated above.
 
@@ -226,3 +226,35 @@ builder workarounds used for the checked AppImage. Native APK/code source overla
 match the corresponding freshly branded trees. The exact candidate must pass the
 public release workflow on `umbrel-drive-rc2` before advancing the store's main
 branch; the immutable release will then already contain its downloads.
+
+
+## rc.2 publication verification (2026-11-11)
+
+Public CI [42966057657](https://github.com/carter-scramlin/umbrel-cloud-store/actions/runs/42966057657)
+passed for source commit `32fe054db92aebd95dd8fc8224d5c0df0469798d`.
+The [1.2.0-rc.2 release](https://github.com/carter-scramlin/umbrel-cloud-store/releases/tag/umbrel-drive-v1.2.0-rc.2)
+is marked prerelease and contains 16 assets. Its target commit is that same tested
+source. Main was advanced to that commit only after publication and public checksum
+verification. This supersedes the pre-publication gate described above.
+
+The published SHA256SUMS and GitHub asset digests match the signed Android APK
+and Linux AppImage. Both published corresponding native source archives and the
+server source ZIP were downloaded and checksum-verified. Android 1.2.0 SHA-256:
+`4d43f7bfa588070666b1ecd799a2b2070c7814f7a464da886d36e2f297c7ec0d`.
+Linux 1.1.0 SHA-256:
+`ca7b87886b93e4faa4b1ab54f10817e21b837eca16259f999bb331ea82962b59`.
+
+Android 13 accepted the published 1.2.0 APK as an update to 1.1.0. The sign-in
+Remote access screen rendered with local selection and Allow HTTP unchecked.
+Saving an HTTPS Tailscale address and selecting that profile updated the sign-in
+address. Reopening the settings retained both the address and selection. The local
+profile was then restored as the default for new sign-ins; HTTP remained disabled.
+The Browser permission to install unknown apps was restored to disabled immediately
+after the update. No native account sign-in, certificate acceptance, upload, offline
+transfer, or connection to the tailnet is implied by this settings-only check.
+
+The installed server remains ready with no active operation or last-operation
+failure. It was not updated, reset or uninstalled during rc.2 publication. The new
+web UI still needs its browser visual/interaction gate; automatic approval review
+rejected the same local URL because of the saved browser site-permission setting.
+Stable promotion remains pending that gate and end-to-end native transfer QA.
