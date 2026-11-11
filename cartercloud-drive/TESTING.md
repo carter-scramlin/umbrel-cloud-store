@@ -23,6 +23,16 @@
   zero errors, four existing image-digest/hardening warnings. Runtime digests remain
   pinned to the tested images.
 
+Signed native assets were reconstructed from public asset commit
+`ec41c4d413cf3e026bb7fc7f4c7ad6f706ed1de2` and checksum-verified:
+
+- Android 1.2.0: `4d43f7bfa588070666b1ecd799a2b2070c7814f7a464da886d36e2f297c7ec0d`
+- Linux 1.1.0: `ca7b87886b93e4faa4b1ab54f10817e21b837eca16259f999bb331ea82962b59`
+
+Android retains package `io.github.carterscramlin.umbreldrive`, original signing
+certificate `4ccb80a94c3cffae93bdc2f35e122a09a19bb6bd0917e69c9322846286f57235`,
+and upgrade version code 350000292. The default HTTPS connection is unchanged.
+
 The local browser retry remains blocked by a saved site-permission setting. No
 alternate surface bypass is used. Android settings UI and WAN/native upload/offline
 QA remain unverified for this client update. Earlier verification is scoped below.
