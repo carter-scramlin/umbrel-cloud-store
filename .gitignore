@@ -1,2 +1,3 @@
 **/data/
 .env
+scripts/__pycache__/

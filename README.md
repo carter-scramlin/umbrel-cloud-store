@@ -1,6 +1,6 @@
 # Carter Cloud — Umbrel Community App Store
 
-A community app store containing **Pydio Cells**, **OpenCloud**, **Filestash**, **T3 Code**, and **Umbrel Drive** for umbrelOS.
+A community app store containing **Pydio Cells**, **OpenCloud**, **Filestash**, **T3 Code**, **Umbrel Drive**, and **PancakeSlicer** for umbrelOS.
 No Portainer or separate database installation is required.
 
 ## Install in Umbrel
@@ -217,6 +217,20 @@ history, Trash, a Linux sync and backup agent, and an installable Android web
 client. Requires umbrelOS 2.0 and trusted HTTPS. See the
 [Umbrel Drive setup guide](cartercloud-umbrel-drive/README.md).
 
+## PancakeSlicer
+
+Install **PancakeSlicer** from Carter Cloud and open it from Umbrel on port
+**8389**. Requires umbrelOS 2.0 or newer. Projects, printer profiles, settings,
+and jobs persist in the app data directory. Keep Umbrel login protection on.
+See the [package guide](cartercloud-pancakeslicer/README.md) for printer access,
+storage, verification, and update behavior.
+
+The **PancakeSlicer updates** GitHub Actions workflow checks stable releases
+hourly. It verifies both image architectures and runs Docker startup and data
+persistence checks before updating the store's version and pinned image.
+Umbrel offers the new version through its normal Update interface after its
+next community-store refresh; installation remains your choice.
+
 ## Ports
 
 | App | Umbrel launcher | Other host port |
@@ -225,6 +239,7 @@ client. Requires umbrelOS 2.0 and trusted HTTPS. See the
 | OpenCloud | 8385 | 9443 (HTTPS) |
 | Filestash | 8386 | None |
 | T3 Code | 8387 (HTTPS) | None |
+| PancakeSlicer | 8389 | None |
 | Umbrel Drive | 8390 (HTTPS) | None |
 | Umbrel Drive Preview | 8388 (HTTPS) | None |
 

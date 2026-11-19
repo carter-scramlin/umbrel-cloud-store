@@ -1,0 +1,54 @@
+name: PancakeSlicer updates
+on:
+  schedule:
+    - cron: '23 * * * *'
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'cartercloud-pancakeslicer/**'
+      - 'scripts/*pancakeslicer*'
+      - '.github/workflows/pancakeslicer-updates.yml'
+  pull_request:
+    paths:
+      - 'cartercloud-pancakeslicer/**'
+      - 'scripts/*pancakeslicer*'
+      - '.github/workflows/pancakeslicer-updates.yml'
+permissions:
+  contents: read
+concurrency:
+  group: pancakeslicer-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  check-and-publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Prepare test tools
+        run: |
+          python3 -m venv "$RUNNER_TEMP/pancake-venv"
+          "$RUNNER_TEMP/pancake-venv/bin/pip" install PyYAML==6.0.3
+          echo "$RUNNER_TEMP/pancake-venv/bin" >> "$GITHUB_PATH"
+      - name: Test release selection
+        run: python3 scripts/test-pancakeslicer-updater.py
+      - name: Check stable upstream release and multi-platform image
+        id: update
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/update-pancakeslicer.py
+      - name: Verify packaged runtime and persistence
+        if: steps.update.outputs.changed == 'true' || github.event_name == 'push' || github.event_name == 'pull_request'
+        run: python3 scripts/test-pancakeslicer-runtime.py
+      - name: Publish update to the community store
+        if: steps.update.outputs.changed == 'true' && github.ref == 'refs/heads/main'
+        run: |
+          git diff --check
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add cartercloud-pancakeslicer/umbrel-app.yml cartercloud-pancakeslicer/docker-compose.yml
+          git commit -m 'Update PancakeSlicer to latest stable release'
+          git push origin HEAD:main

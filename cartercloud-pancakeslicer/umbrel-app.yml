@@ -1,0 +1,39 @@
+manifestVersion: 2.0
+id: cartercloud-pancakeslicer
+storage:
+  dataRoot: data
+category: files
+name: PancakeSlicer
+version: "0.5.4"
+tagline: Slice 3D prints with curved non-planar layers
+description: >-
+  PancakeSlicer is a self-hosted 3D printing slicer built on the OrcaSlicer
+  engine. Prepare models, preview toolpaths, use printer and filament profiles,
+  and experiment with non-planar slicing from your browser.
+
+
+  Projects, profiles, printer connections, preferences, and jobs are stored
+  persistently on your Umbrel. LAN printer connections are enabled; enter your
+  printer's IP address if automatic discovery is unavailable. Umbrel login
+  protection stays enabled.
+
+
+  New stable upstream releases are checked hourly and published to this store
+  after image and startup checks. Install offered updates through Umbrel.
+  Non-planar printing requires a suitable printer profile and clearance checks.
+releaseNotes: >-
+  Initial Carter Cloud package of PancakeSlicer 0.5.4 with persistent storage,
+  Umbrel login protection, and automatic store updates for stable releases.
+developer: Zimeng Xiong
+website: https://pancake.cooking
+dependencies: []
+repo: https://github.com/ZimengXiong/PancakeSlicer
+support: https://github.com/carter-scramlin/umbrel-cloud-store/issues
+port: 8389
+gallery: []
+path: ""
+defaultUsername: ""
+defaultPassword: ""
+icon: https://raw.githubusercontent.com/ZimengXiong/PancakeSlicer/cc6e8e267d42151b36a8c493da135c9a28200c97/web/public/apple-touch-icon.png
+submitter: Carter Scramlin
+submission: https://github.com/carter-scramlin/umbrel-cloud-store
