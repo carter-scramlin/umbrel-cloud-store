@@ -12,7 +12,7 @@ services:
       - ${APP_DATA_DIR}/data:/data
     command: [sh, -ec, "chown 65532:65532 /data"]
   server:
-    image: ghcr.io/zimengxiong/pancakeslicer:0.5.5@sha256:92af64c317fd9cc69a84dd4ba650f422d1952acf374a3b9ae6c10fdfd01008a7
+    image: ghcr.io/zimengxiong/pancakeslicer:0.5.6@sha256:8c0537c72e27590fa9148c331e5d9619111e189e0fa5436060fb9d3959052460
     user: "65532:65532"
     init: true
     restart: on-failure

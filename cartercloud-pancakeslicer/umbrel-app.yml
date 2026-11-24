@@ -4,7 +4,7 @@ storage:
   dataRoot: data
 category: files
 name: PancakeSlicer
-version: "0.5.5"
+version: "0.5.6"
 tagline: Slice 3D prints with curved non-planar layers
 description: >-
   PancakeSlicer is a self-hosted 3D printing slicer built on the OrcaSlicer
@@ -21,7 +21,7 @@ description: >-
   New stable upstream releases are checked hourly and published to this store
   after image and startup checks. Install offered updates through Umbrel.
   Non-planar printing requires a suitable printer profile and clearance checks.
-releaseNotes: "PancakeSlicer 0.5.5. Release details: https://github.com/ZimengXiong/PancakeSlicer/releases/tag/v0.5.5"
+releaseNotes: "PancakeSlicer 0.5.6. Release details: https://github.com/ZimengXiong/PancakeSlicer/releases/tag/v0.5.6"
 developer: Zimeng Xiong
 website: https://pancake.cooking
 dependencies: []
