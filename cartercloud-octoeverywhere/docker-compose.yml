@@ -1,0 +1,163 @@
+services:
+  app_proxy:
+    environment:
+      APP_HOST: cartercloud-octoeverywhere_server_1
+      APP_PORT: 8080
+  permissions:
+    image: busybox:1.37.0@sha256:a7dbc319b1438115a207e11930dc4bb3e643dcb3ec0bdd694bb36cd8fad289ec
+    user: "0:0"
+    restart: "no"
+    network_mode: none
+    volumes:
+      - ${APP_DATA_DIR}/data:/data
+    command: [sh, -ec, "chown 1001:0 /data && chmod 700 /data"]
+  server:
+    image: octoeverywhere/octoeverywhere:latest
+    user: "1001:0"
+    init: true
+    restart: on-failure
+    depends_on:
+      permissions:
+        condition: service_completed_successfully
+    environment:
+      COMPANION_MODE: klipper
+      MOONRAKER_PORT: "7125"
+      WEBSERVER_PORT: "80"
+      PYTHONUNBUFFERED: "1"
+    volumes:
+      - ${APP_DATA_DIR}/data:/data
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    entrypoint: ["/app/octoeverywhere-env/bin/python", "-u", "-c"]
+    command:
+      - |
+        import collections
+        import html
+        import ipaddress
+        import json
+        import os
+        import re
+        import secrets
+        import signal
+        import subprocess
+        import threading
+        import time
+        from http.server import BaseHTTPRequestHandler, HTTPServer
+        from pathlib import Path
+        from urllib.parse import parse_qs
+        
+        settings = Path("/data/umbrel-printer.json")
+        token = secrets.token_urlsafe(32)
+        lines = collections.deque(maxlen=100)
+        lock = threading.Lock()
+        changed = threading.Event()
+        def read_ip():
+            try:
+                return str(ipaddress.IPv4Address(json.loads(settings.read_text())["ip"]))
+            except (OSError, ValueError, KeyError, TypeError):
+                return ""
+        
+        def supervise():
+            while True:
+                changed.clear()
+                ip = read_ip()
+                if not ip:
+                    changed.wait(2)
+                    continue
+                with lock:
+                    lines.clear()
+                env = dict(os.environ, COMPANION_MODE="klipper", PRINTER_IP=ip)
+                proc = subprocess.Popen(
+                    ["/app/octoeverywhere-env/bin/python", "-m", "docker_octoeverywhere"],
+                    env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                    text=True, errors="replace", start_new_session=True, bufsize=1)
+                def capture():
+                    for line in proc.stdout:
+                        print(line.rstrip(), flush=True)
+                        with lock:
+                            lines.append(line.rstrip())
+                reader = threading.Thread(target=capture, daemon=True)
+                reader.start()
+                while proc.poll() is None and not changed.wait(1):
+                    pass
+                if proc.poll() is None:
+                    os.killpg(proc.pid, signal.SIGTERM)
+                    try:
+                        proc.wait(timeout=8)
+                    except subprocess.TimeoutExpired:
+                        os.killpg(proc.pid, signal.SIGKILL)
+                        proc.wait()
+                reader.join(timeout=2)
+                changed.wait(5)
+        
+        class Page(BaseHTTPRequestHandler):
+            def do_GET(self):
+                if self.path != "/":
+                    self.send_error(404)
+                    return
+                with lock:
+                    log = "\n".join(lines)
+                urls = re.findall(r"https://octoeverywhere\.com/[^\s<>]+", log)
+                links = [u for u in urls if "getstarted" in u.lower() or "/link" in u.lower()]
+                link = ""
+                if links:
+                    url = html.escape(links[-1], quote=True)
+                    link = f'<p><a class="button" href="{url}" target="_blank" rel="noopener noreferrer">Link your printer</a></p>'
+                body = f"""<!doctype html><html lang="en"><meta charset="utf-8">
+                <meta name="viewport" content="width=device-width,initial-scale=1">
+                <title>OctoEverywhere Companion</title><style>
+                body{{font:16px system-ui;background:#101827;color:#f8fafc;margin:0;padding:32px}}
+                main{{max-width:720px;margin:auto}} section{{background:#1e293b;padding:24px;border-radius:16px;margin:20px 0}}
+                input,button,.button{{box-sizing:border-box;padding:12px;border-radius:8px;border:0;font:inherit}}
+                input{{width:100%;margin:12px 0}} button,.button{{background:#38bdf8;color:#082f49;font-weight:700;text-decoration:none;cursor:pointer}}
+                a{{color:#7dd3fc}} pre{{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px}}
+                </style><main><h1>OctoEverywhere</h1><p>Klipper Companion · FlashForge AD5X / ZMOD</p>
+                <section><h2>Printer connection</h2><form method="post" action="/configure">
+                <input type="hidden" name="token" value="{token}">
+                <label for="ip">Printer IPv4 address</label>
+                <input id="ip" name="ip" required placeholder="192.168.1.100" value="{html.escape(read_ip())}">
+                <button>Save and connect</button></form>
+                <p>Moonraker port 7125 · Fluidd port 80</p></section>
+                <section><h2>Account linking</h2><p>After connecting, use the pairing link shown in the logs, or open your OctoEverywhere portal.</p>
+                {link}<p><a href="https://octoeverywhere.com/" target="_blank" rel="noopener noreferrer">Open OctoEverywhere</a> · <a href="/">Refresh status</a></p>
+                <pre>{html.escape(log or "Waiting for printer configuration…")}</pre></section></main></html>"""
+                content = body.encode()
+                self.send_response(200)
+                self.send_header("Content-Type", "text/html; charset=utf-8")
+                self.send_header("Cache-Control", "no-store")
+                self.send_header("X-Content-Type-Options", "nosniff")
+                self.send_header("Content-Length", str(len(content)))
+                self.end_headers()
+                self.wfile.write(content)
+        
+            def do_POST(self):
+                if self.path != "/configure":
+                    self.send_error(404)
+                    return
+                try:
+                    size = int(self.headers.get("Content-Length", "0"))
+                    if not 0 < size <= 1024:
+                        raise ValueError()
+                    form = parse_qs(self.rfile.read(size).decode())
+                    if not secrets.compare_digest(form.get("token", [""])[0], token):
+                        self.send_error(403)
+                        return
+                    ip = ipaddress.IPv4Address(form["ip"][0].strip())
+                    if ip.is_unspecified or ip.is_loopback or ip.is_multicast or ip.is_link_local or not ip.is_private:
+                        raise ValueError()
+                    tmp = settings.with_suffix(".tmp")
+                    tmp.write_text(json.dumps({"ip": str(ip)}))
+                    os.chmod(tmp, 0o600)
+                    tmp.replace(settings)
+                    changed.set()
+                except (ValueError, KeyError, UnicodeError, OSError):
+                    self.send_error(400, "Enter a valid private LAN IPv4 address.")
+                    return
+                self.send_response(303)
+                self.send_header("Location", "/")
+                self.end_headers()
+        
+        threading.Thread(target=supervise, daemon=True).start()
+        HTTPServer(("0.0.0.0", 8080), Page).serve_forever()

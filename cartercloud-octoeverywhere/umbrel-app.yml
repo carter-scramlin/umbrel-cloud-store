@@ -1,0 +1,28 @@
+manifestVersion: 2.0
+id: cartercloud-octoeverywhere
+storage:
+  dataRoot: data
+category: utilities
+name: OctoEverywhere
+version: "1.0.0"
+tagline: Remotely monitor your Klipper printer
+description: >-
+  Connect a Klipper or Moonraker printer, including a FlashForge AD5X running
+  ZMOD, to OctoEverywhere without installing software on the printer itself.
+  Enter the printer's local IPv4 address, then follow the account pairing link.
+  Access remote monitoring, notifications, and supported camera features
+  through your OctoEverywhere account. Umbrel login protection stays enabled.
+releaseNotes: "Initial community package with local printer configuration and pairing logs."
+developer: OctoEverywhere
+website: https://octoeverywhere.com
+dependencies: []
+repo: https://github.com/QuinnDamerell/OctoPrint-OctoEverywhere
+support: https://github.com/carter-scramlin/umbrel-cloud-store/issues
+port: 8391
+gallery: []
+path: ""
+defaultUsername: ""
+defaultPassword: ""
+icon: https://raw.githubusercontent.com/carter-scramlin/umbrel-cloud-store/main/cartercloud-octoeverywhere/icon.svg
+submitter: Carter Scramlin
+submission: https://github.com/carter-scramlin/umbrel-cloud-store

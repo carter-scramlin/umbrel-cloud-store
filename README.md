@@ -1,6 +1,6 @@
 # Carter Cloud — Umbrel Community App Store
 
-A community app store containing **Pydio Cells**, **OpenCloud**, **Filestash**, **T3 Code**, **Umbrel Drive**, and **PancakeSlicer** for umbrelOS.
+A community app store containing **Pydio Cells**, **OpenCloud**, **Filestash**, **T3 Code**, **Umbrel Drive**, **PancakeSlicer**, and **OctoEverywhere** for umbrelOS.
 No Portainer or separate database installation is required.
 
 ## Install in Umbrel
@@ -231,6 +231,10 @@ persistence checks before updating the store's version and pinned image.
 Umbrel offers the new version through its normal Update interface after its
 next community-store refresh; installation remains your choice.
 
+## OctoEverywhere
+
+Install **OctoEverywhere** from Carter Cloud on port **8391**. Open the app, enter your Klipper/Moonraker printer's LAN IPv4 address and follow the account pairing link in the logs. Supports the ZMOD-enabled AD5X through Moonraker. See the [setup and limitations](cartercloud-octoeverywhere/README.md).
+
 ## Ports
 
 | App | Umbrel launcher | Other host port |
@@ -240,6 +244,7 @@ next community-store refresh; installation remains your choice.
 | Filestash | 8386 | None |
 | T3 Code | 8387 (HTTPS) | None |
 | PancakeSlicer | 8389 | None |
+| OctoEverywhere | 8391 | None |
 | Umbrel Drive | 8390 (HTTPS) | None |
 | Umbrel Drive Preview | 8388 (HTTPS) | None |
 
